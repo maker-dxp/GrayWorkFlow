@@ -22,6 +22,11 @@ include_once 'Firebase/JWT/JWT.php';
 require_once 'Firebase/JWT/SignatureInvalidException.php';
 require_once 'Firebase/JWT/BeforeValidException.php';
 require_once 'Firebase/JWT/ExpiredException.php';
+
+function is_get():bool{return $_SERVER['REQUEST_METHOD'] == 'GET' ? true : false;}
+function is_post():bool{return $_SERVER['REQUEST_METHOD'] == 'POST' ? true : false;}
+function _echo($i){echo $i;return true;}
+
 function createToken()
 {
     $key = '344'; //key，唯一标识
@@ -40,8 +45,7 @@ function createToken()
 }
 
 // $token：签发的token
-function verifyToken($token,$ifstander=false)
-{
+function verifyToken($token,$ifstander=false){
     $key = '344'; //key要和签发的时候一样，唯一标识
     try {
         JWT::$leeway = 60;//当前时间减去60，把时间留点余地
@@ -52,7 +56,6 @@ function verifyToken($token,$ifstander=false)
     } catch(\Firebase\JWT\SignatureInvalidException $e) {  //签名不正确
         // echo $e->getMessage();
         echo('{"success":false,"message":"'.$e->getMessage().'"}');
-
         return false;
     }catch(\Firebase\JWT\BeforeValidException $e) {  // 签名在某个时间点之后才能用
         // echo $e->getMessage();
@@ -69,8 +72,7 @@ function verifyToken($token,$ifstander=false)
     }
 }
 
-function getAuthorizationHeader()
-{
+function getAuthorizationHeader(){
     $headers = null;
     if (isset($_SERVER['Authorization'])) {
         $headers = trim($_SERVER["Authorization"]);
@@ -80,7 +82,6 @@ function getAuthorizationHeader()
         $requestHeaders = apache_request_headers();
         // Server-side fix for bug in old Android versions (a nice side-effect of this fix means we don't care about capitalization for Authorization)
         $requestHeaders = array_combine(array_map('ucwords', array_keys($requestHeaders)), array_values($requestHeaders));
-        //print_r($requestHeaders);
         if (isset($requestHeaders['Authorization'])) {
             $headers = trim($requestHeaders['Authorization']);
         }
@@ -100,8 +101,17 @@ function getKeyinArrayNum($key,$array){
     return -1;
 }
 
-function getBearerToken()
-{
+function analyJson($json_str){
+    $out = json_decode($json_str,true);
+    if(!json_last_error() == JSON_ERROR_NONE){
+        // echo(json_last_error());
+        return false;
+    } else {
+        return $out;
+    }
+}
+
+function getBearerToken(){
     $headers = getAuthorizationHeader();
     // HEADER: Get the access token from the header
     if (!empty($headers)) {
@@ -112,9 +122,11 @@ function getBearerToken()
     return null;
 }
 
+
+
+
 header('Content-type: application/json');
-switch ($_GET['action'])
-{
+switch ($_GET['action']){
 case "getAuthorizationHeader":
     echo(getBearerToken());
     break;
@@ -125,12 +137,9 @@ case "createToken":
     echo(createToken());
     break;
 case "login":
-    if(!file_get_contents("php://input")){
-        echo('{"success":false,"status_code":"404","message":"Body为空"}');
-        break;
-    }
-    $in = [];
-    $in = json_decode(file_get_contents("php://input"),true);
+    !file_get_contents("php://input")&&_echo('{"success":false,"status_code":"400","message":"Body为空"}')&&exit();
+    !analyJson(file_get_contents("php://input"))&&_echo('{"success":false,"status_code":"400","message":"Json格式有误"}')&&exit();
+    $in = analyJson(file_get_contents("php://input"));
     $se = ['Test'=>'123456','2333'=>'123123'];
     if(array_key_exists('UserName',$in) && array_key_exists('Password',$in)){
         if($in['Password']==$se[$in['UserName']]){
@@ -144,16 +153,13 @@ case "login":
             echo('{"success":false,"status_code":"403","message":"密码不正确"}');
         }
     } else {
-        echo('{"success":false,"status_code":"404","message":"用户名或密码缺失"}');
+        echo('{"success":false,"status_code":"400","message":"用户名或密码缺失"}');
     }
     break;
 case "createUser":
     // if(verifyToken(getBearerToken())){
-        if(!file_get_contents("php://input")){
-            echo('{"success":false,"status_code":"404","message":"Body为空"}');
-            break;
-        }
-        $in = [];
+        !file_get_contents("php://input")&&_echo('{"success":false,"status_code":"400","message":"Body为空"}')&&exit();
+        !analyJson(file_get_contents("php://input"))&&_echo('{"success":false,"status_code":"400","message":"Json格式有误"}')&&exit();
         $in = json_decode(file_get_contents("php://input"),true);
         if(array_key_exists('UserName',$in) && array_key_exists('Password',$in)){
             $username = $in['UserName'];
@@ -164,7 +170,7 @@ case "createUser":
     // } 
     break;
     default:
-    echo('{"success":false,"status_code":"404","message":"无效的请求"}');
+    echo('{"success":false,"status_code":"400","message":"无效的请求"}');
 }
 
 ?>
