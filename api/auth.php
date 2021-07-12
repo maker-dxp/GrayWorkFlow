@@ -27,7 +27,65 @@ function is_get():bool{return $_SERVER['REQUEST_METHOD'] == 'GET' ? true : false
 function is_post():bool{return $_SERVER['REQUEST_METHOD'] == 'POST' ? true : false;}
 function _echo($i){echo $i;return true;}
 
-function createToken()
+function sendHttpStatus($code) {
+    static $_status = array(
+            // Informational 1xx
+            100 => 'Continue',
+            101 => 'Switching Protocols',
+            // Success 2xx
+            200 => 'OK',
+            201 => 'Created',
+            202 => 'Accepted',
+            203 => 'Non-Authoritative Information',
+            204 => 'No Content',
+            205 => 'Reset Content',
+            206 => 'Partial Content',
+            // Redirection 3xx
+            300 => 'Multiple Choices',
+            301 => 'Moved Permanently',
+            302 => 'Moved Temporarily ',  // 1.1
+            303 => 'See Other',
+            304 => 'Not Modified',
+            305 => 'Use Proxy',
+            // 306 is deprecated but reserved
+            307 => 'Temporary Redirect',
+            // Client Error 4xx
+            400 => 'Bad Request',
+            401 => 'Unauthorized',
+            402 => 'Payment Required',
+            403 => 'Forbidden',
+            404 => 'Not Found',
+            405 => 'Method Not Allowed',
+            406 => 'Not Acceptable',
+            407 => 'Proxy Authentication Required',
+            408 => 'Request Timeout',
+            409 => 'Conflict',
+            410 => 'Gone',
+            411 => 'Length Required',
+            412 => 'Precondition Failed',
+            413 => 'Request Entity Too Large',
+            414 => 'Request-URI Too Long',
+            415 => 'Unsupported Media Type',
+            416 => 'Requested Range Not Satisfiable',
+            417 => 'Expectation Failed',
+            // Server Error 5xx
+            500 => 'Internal Server Error',
+            501 => 'Not Implemented',
+            502 => 'Bad Gateway',
+            503 => 'Service Unavailable',
+            504 => 'Gateway Timeout',
+            505 => 'HTTP Version Not Supported',
+            509 => 'Bandwidth Limit Exceeded'
+    );
+    if(isset($_status[$code])) {
+        header('HTTP/1.1 '.$code.' '.$_status[$code]);
+        // 确保FastCGI模式下正常
+        header('Status:'.$code.' '.$_status[$code]);
+    }
+    return true;
+}
+
+function createToken($username,$userid,$usergroup='Undefined')
 {
     $key = '344'; //key，唯一标识
     $time = time(); //当前时间
@@ -36,7 +94,9 @@ function createToken()
         'nbf' => $time , //(Not Before)：某个时间点后才能访问，比如设置time+30，表示当前时间30秒后才能使用
         'exp' => $time+7200, //过期时间,这里设置2个小时
         'data' => [ //自定义信息，不要定义敏感信息
-            'device_id' => 'asdfghj',
+            'username' => $username,
+            'userid' => $userid,
+            'usergroup' => $usergroup
         ]
     ];
     $token = JWT::encode($token, $key,'HS256'); //签发token
@@ -52,22 +112,22 @@ function verifyToken($token,$ifstander=false){
         $decoded = JWT::decode($token, $key, ['HS256']); //HS256方式，这里要和签发的时候对应
         $arr = (array)$decoded;
         // print_r($arr);
-        return true;
+        return $arr;
     } catch(\Firebase\JWT\SignatureInvalidException $e) {  //签名不正确
-        // echo $e->getMessage();
-        echo('{"success":false,"message":"'.$e->getMessage().'"}');
+        echo('{"message":"'.$e->getMessage().'","code":401}');
+        sendHttpStatus(401);
         return false;
     }catch(\Firebase\JWT\BeforeValidException $e) {  // 签名在某个时间点之后才能用
-        // echo $e->getMessage();
-        echo('{"success":false,"message":"'.$e->getMessage().'"}');
+        echo('{"message":"'.$e->getMessage().'","code":401}');
+        sendHttpStatus(401);
         return false;
     }catch(\Firebase\JWT\ExpiredException $e) {  // token过期
-        // echo $e->getMessage();
-        echo('{"success":false,"message":"'.$e->getMessage().'"}');
+        echo('{"message":"'.$e->getMessage().'","code":401}');
+        sendHttpStatus(401);
         return false;
     }catch(Exception $e) {  //其他错误
-        // echo $e->getMessage();
-        echo('{"success":false,"message":"'.$e->getMessage().'"}');
+        echo('{"message":"'.$e->getMessage().'","code":401}');
+        sendHttpStatus(401);
         return false;
     }
 }
@@ -133,44 +193,47 @@ case "getAuthorizationHeader":
 case "verifyToken":
     verifyToken(getBearerToken());
     break;
-case "createToken":
-    echo(createToken());
-    break;
+// case "createToken":
+//     echo(createToken());
+//     break;
 case "login":
-    !file_get_contents("php://input")&&_echo('{"success":false,"status_code":"400","message":"Body为空"}')&&exit();
-    !analyJson(file_get_contents("php://input"))&&_echo('{"success":false,"status_code":"400","message":"Json格式有误"}')&&exit();
+    !is_post()&&_echo('{"message":"Method Not Allowed","code":405}')&&sendHttpStatus(405)&&exit();
+    !file_get_contents("php://input")&&_echo('{"message":"Body为空","code":400}')&&sendHttpStatus(400)&&exit();
+    !analyJson(file_get_contents("php://input"))&&_echo('{"message":"Json格式有误","code":400}')&&sendHttpStatus(400)&&exit();
     $in = analyJson(file_get_contents("php://input"));
     $se = ['Test'=>'123456','2333'=>'123123'];
     if(array_key_exists('UserName',$in) && array_key_exists('Password',$in)){
         if($in['Password']==$se[$in['UserName']]){
-            $token = json_decode(createToken(),true)['data']['token'];
             $username = $in['UserName'];
             $id = getKeyinArrayNum($in['UserName'],$se);
-            // echo('{"success":true,"status_code":"200","UserName": "Test","UserId": 1,"Token": "'.json_decode(createToken(),true)['data']['token'].'","message":"登录成功"}');
+            $token = json_decode(createToken($username,$id),true)['data']['token'];
             $data = ['message'=>'登录成功','code'=>200,'data'=>['UserName'=>$username,'Token'=>$token,'id'=>$id]];
             echo(json_encode($data));
         } else {
-            echo('{"success":false,"status_code":"403","message":"密码不正确"}');
+            echo('{"message":"密码不正确","code":401}');
+            sendHttpStatus(401);
         }
     } else {
-        echo('{"success":false,"status_code":"400","message":"用户名或密码缺失"}');
+        echo('{"message":"用户名或密码缺失","code":400}');
+        sendHttpStatus(400);
     }
     break;
+
 case "createUser":
-    // if(verifyToken(getBearerToken())){
-        !file_get_contents("php://input")&&_echo('{"success":false,"status_code":"400","message":"Body为空"}')&&exit();
-        !analyJson(file_get_contents("php://input"))&&_echo('{"success":false,"status_code":"400","message":"Json格式有误"}')&&exit();
-        $in = json_decode(file_get_contents("php://input"),true);
-        if(array_key_exists('UserName',$in) && array_key_exists('Password',$in)){
-            $username = $in['UserName'];
-            $password = $in['Password'];
-            $data = ['message'=>'创建成功','code'=>200,'data'=>['UserName'=>$username,'Password'=>$password,'id'=>1]];
-            echo(json_encode($data));    
-        }
-    // } 
+    !is_post()&&_echo('{"message":"Method Not Allowed","code":405}')&&sendHttpStatus(405)&&exit();
+    !verifyToken(getBearerToken())&&exit();
+    !file_get_contents("php://input")&&_echo('{"message":"Body为空","code":400}')&&sendHttpStatus(400)&&exit();
+    !analyJson(file_get_contents("php://input"))&&_echo('{"message":"Json格式有误","code":400}')&&sendHttpStatus(400)&&exit();
+    $in = json_decode(file_get_contents("php://input"),true);
+    if(array_key_exists('UserName',$in) && array_key_exists('Password',$in)){
+        $username = $in['UserName'];
+        $password = $in['Password'];
+        $data = ['message'=>'创建成功','code'=>200,'data'=>['UserName'=>$username,'Password'=>$password,'id'=>1]];
+        echo(json_encode($data));    
+    }
     break;
     default:
-    echo('{"success":false,"status_code":"400","message":"无效的请求"}');
+    echo('{"message":"无效的请求","code":400}');
 }
 
 ?>
