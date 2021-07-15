@@ -3,20 +3,6 @@
 ini_set("display_errors", "On");
 error_reporting(E_ALL | E_STRICT);
 
-function passCrypt($password){
-    $salt = salt($password);
-    $password=crypt($password,$salt);
-    return $password;
-}
-
-//生成密码盐
-function salt($password){
-    $password=md5($password);
-    $password = md5($password."saltsalt");
-    $salt=substr($password,0,5);
-    return $salt;
-}
-
 use Firebase\JWT\JWT;
 include_once 'Firebase/JWT/JWT.php';
 require_once 'Firebase/JWT/SignatureInvalidException.php';
@@ -25,7 +11,7 @@ require_once 'Firebase/JWT/ExpiredException.php';
 
 function is_get():bool{return $_SERVER['REQUEST_METHOD'] == 'GET' ? true : false;}
 function is_post():bool{return $_SERVER['REQUEST_METHOD'] == 'POST' ? true : false;}
-function _echo($i){echo $i;return true;}
+function _echo($i){echo $i;return true;}    //echo函数化
 
 function sendHttpStatus($code) {
     static $_status = array(
@@ -100,32 +86,21 @@ function createToken($username,$userid,$usergroup='Undefined')
         ]
     ];
     $token = JWT::encode($token, $key,'HS256'); //签发token
-    $data = ['error'=>0,'mgs'=>'success','data'=>['token'=>$token]];
-    return json_encode($data);
+    return $token;
 }
 
 // $token：签发的token
-function verifyToken($token,$ifstander=false){
-    $key = '344'; //key要和签发的时候一样，唯一标识
+function verifyToken($token){
+    //验证 JWT
+    $key = '344';
     try {
-        JWT::$leeway = 60;//当前时间减去60，把时间留点余地
-        $decoded = JWT::decode($token, $key, ['HS256']); //HS256方式，这里要和签发的时候对应
+        JWT::$leeway = 60;  //允许的时间误差,单位:min
+        $decoded = JWT::decode($token, $key, ['HS256']);
         $arr = (array)$decoded;
         // print_r($arr);
         return $arr;
-    } catch(\Firebase\JWT\SignatureInvalidException $e) {  //签名不正确
-        echo('{"message":"'.$e->getMessage().'","code":401}');
-        sendHttpStatus(401);
-        return false;
-    }catch(\Firebase\JWT\BeforeValidException $e) {  // 签名在某个时间点之后才能用
-        echo('{"message":"'.$e->getMessage().'","code":401}');
-        sendHttpStatus(401);
-        return false;
-    }catch(\Firebase\JWT\ExpiredException $e) {  // token过期
-        echo('{"message":"'.$e->getMessage().'","code":401}');
-        sendHttpStatus(401);
-        return false;
-    }catch(Exception $e) {  //其他错误
+    } catch(Exception $e) {  //捕获所有异常
+        //\Firebase\JWT\SignatureInvalidException | \Firebase\JWT\BeforeValidException | \Firebase\JWT\ExpiredException | 
         echo('{"message":"'.$e->getMessage().'","code":401}');
         sendHttpStatus(401);
         return false;
@@ -133,6 +108,7 @@ function verifyToken($token,$ifstander=false){
 }
 
 function getAuthorizationHeader(){
+    //获取 Header Authorization 中的数据
     $headers = null;
     if (isset($_SERVER['Authorization'])) {
         $headers = trim($_SERVER["Authorization"]);
@@ -149,7 +125,19 @@ function getAuthorizationHeader(){
     return $headers;
 }
 
+function getBearerToken(){
+    //从 Header Authorization 中获取 Token
+    $headers = getAuthorizationHeader();
+    if (!empty($headers)) {
+        if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
+            return $matches[1];
+        }
+    }
+    return null;
+}
+
 function getKeyinArrayNum($key,$array){
+    //凑数用的, 之后肯定会删掉, 不解释
     $n = 0;
     foreach(array_keys($array) as $each){
         // echo($each.' '.$key.'|');
@@ -162,6 +150,7 @@ function getKeyinArrayNum($key,$array){
 }
 
 function analyJson($json_str){
+    //验证传入 JSON 的格式并返回 Array, 若格式有误则返回 False
     $out = json_decode($json_str,true);
     if(!json_last_error() == JSON_ERROR_NONE){
         // echo(json_last_error());
@@ -171,16 +160,6 @@ function analyJson($json_str){
     }
 }
 
-function getBearerToken(){
-    $headers = getAuthorizationHeader();
-    // HEADER: Get the access token from the header
-    if (!empty($headers)) {
-        if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
-            return $matches[1];
-        }
-    }
-    return null;
-}
 
 
 
@@ -206,7 +185,7 @@ case "login":
         if($in['Password']==$se[$in['UserName']]){
             $username = $in['UserName'];
             $id = getKeyinArrayNum($in['UserName'],$se);
-            $token = json_decode(createToken($username,$id),true)['data']['token'];
+            $token = createToken($username,$id);
             $data = ['message'=>'登录成功','code'=>200,'data'=>['UserName'=>$username,'Token'=>$token,'id'=>$id]];
             echo(json_encode($data));
         } else {
