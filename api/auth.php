@@ -4,10 +4,6 @@ ini_set("display_errors", "On");
 error_reporting(E_ALL | E_STRICT);
 
 use Firebase\JWT\JWT;
-include_once 'Firebase/JWT/JWT.php';
-require_once 'Firebase/JWT/SignatureInvalidException.php';
-require_once 'Firebase/JWT/BeforeValidException.php';
-require_once 'Firebase/JWT/ExpiredException.php';
 
 function is_get():bool{return $_SERVER['REQUEST_METHOD'] == 'GET' ? true : false;}
 function is_post():bool{return $_SERVER['REQUEST_METHOD'] == 'POST' ? true : false;}
@@ -71,8 +67,11 @@ function sendHttpStatus($code) {
     return true;
 }
 
-function createToken($username,$userid,$usergroup='Undefined')
-{
+function createToken($username,$userid,$usergroup='Undefined'){
+    include_once 'Firebase/JWT/JWT.php';
+    include_once 'Firebase/JWT/SignatureInvalidException.php';
+    include_once 'Firebase/JWT/BeforeValidException.php';
+    include_once 'Firebase/JWT/ExpiredException.php';
     $key = '344'; //key，唯一标识
     $time = time(); //当前时间
     $token = [
@@ -91,6 +90,10 @@ function createToken($username,$userid,$usergroup='Undefined')
 
 // $token：签发的token
 function verifyToken($token){
+    include_once 'Firebase/JWT/JWT.php';
+    include_once 'Firebase/JWT/SignatureInvalidException.php';
+    include_once 'Firebase/JWT/BeforeValidException.php';
+    include_once 'Firebase/JWT/ExpiredException.php';
     //验证 JWT
     $key = '344';
     try {
@@ -160,9 +163,47 @@ function analyJson($json_str){
     }
 }
 
+function dologin(){
+    !is_post()&&_echo('{"message":"Method Not Allowed","code":405}')&&sendHttpStatus(405)&&exit();
+    !file_get_contents("php://input")&&_echo('{"message":"Body为空","code":400}')&&sendHttpStatus(400)&&exit();
+    !analyJson(file_get_contents("php://input"))&&_echo('{"message":"Json格式有误","code":400}')&&sendHttpStatus(400)&&exit();
+    //判断请求合法性
+    $in = analyJson(file_get_contents("php://input"));
+    if(array_key_exists('UserName',$in) && array_key_exists('Password',$in)){
+        include_once 'db.php';
+        $username = $in['UserName'];
+        $password = $in['Password'];
+        $req = verifyPassword($conn,$username,$password);
+        !$req&&_echo('{"message":"用户名或密码不正确","code":401}')&&sendHttpStatus(401)&&exit();
+        $id = $req[1];
+        $token = createToken($username,$id);
+        $data = ['message'=>'登录成功','code'=>200,'data'=>['UserName'=>$username,'Token'=>$token,'id'=>$id]];
+        echo(json_encode($data));
+    } else {
+        echo('{"message":"非法请求","code":400}');
+        sendHttpStatus(400);
+    }
+}
 
-
-
+function doCreateUser(){
+    !is_post()&&_echo('{"message":"Method Not Allowed","code":405}')&&sendHttpStatus(405)&&exit();
+    !verifyToken(getBearerToken())&&exit();
+    !file_get_contents("php://input")&&_echo('{"message":"Body为空","code":400}')&&sendHttpStatus(400)&&exit();
+    !analyJson(file_get_contents("php://input"))&&_echo('{"message":"Json格式有误","code":400}')&&sendHttpStatus(400)&&exit();
+    //判断请求合法性
+    $in = json_decode(file_get_contents("php://input"),true);
+    if(array_key_exists('UserName',$in) && array_key_exists('Password',$in) && array_key_exists('UserQQ',$in)){
+        $username = $in['UserName'];
+        $password = $in['Password'];
+        $qq = $in['UserQQ'];
+        
+        $data = ['message'=>'创建成功','code'=>200,'data'=>['UserName'=>$username,'Password'=>$password,'id'=>1]];
+        echo(json_encode($data));
+    } else {
+        echo('{"message":"非法请求","code":400}');
+        sendHttpStatus(400);
+    }
+}
 
 header('Content-type: application/json');
 switch ($_GET['action']){
@@ -176,40 +217,10 @@ case "verifyToken":
 //     echo(createToken());
 //     break;
 case "login":
-    !is_post()&&_echo('{"message":"Method Not Allowed","code":405}')&&sendHttpStatus(405)&&exit();
-    !file_get_contents("php://input")&&_echo('{"message":"Body为空","code":400}')&&sendHttpStatus(400)&&exit();
-    !analyJson(file_get_contents("php://input"))&&_echo('{"message":"Json格式有误","code":400}')&&sendHttpStatus(400)&&exit();
-    $in = analyJson(file_get_contents("php://input"));
-    $se = ['Test'=>'123456','2333'=>'123123'];
-    if(array_key_exists('UserName',$in) && array_key_exists('Password',$in)){
-        if($in['Password']==$se[$in['UserName']]){
-            $username = $in['UserName'];
-            $id = getKeyinArrayNum($in['UserName'],$se);
-            $token = createToken($username,$id);
-            $data = ['message'=>'登录成功','code'=>200,'data'=>['UserName'=>$username,'Token'=>$token,'id'=>$id]];
-            echo(json_encode($data));
-        } else {
-            echo('{"message":"密码不正确","code":401}');
-            sendHttpStatus(401);
-        }
-    } else {
-        echo('{"message":"用户名或密码缺失","code":400}');
-        sendHttpStatus(400);
-    }
+    dologin();
     break;
-
 case "createUser":
-    !is_post()&&_echo('{"message":"Method Not Allowed","code":405}')&&sendHttpStatus(405)&&exit();
-    !verifyToken(getBearerToken())&&exit();
-    !file_get_contents("php://input")&&_echo('{"message":"Body为空","code":400}')&&sendHttpStatus(400)&&exit();
-    !analyJson(file_get_contents("php://input"))&&_echo('{"message":"Json格式有误","code":400}')&&sendHttpStatus(400)&&exit();
-    $in = json_decode(file_get_contents("php://input"),true);
-    if(array_key_exists('UserName',$in) && array_key_exists('Password',$in)){
-        $username = $in['UserName'];
-        $password = $in['Password'];
-        $data = ['message'=>'创建成功','code'=>200,'data'=>['UserName'=>$username,'Password'=>$password,'id'=>1]];
-        echo(json_encode($data));    
-    }
+    doCreateUser();
     break;
     default:
     echo('{"message":"无效的请求","code":400}');
