@@ -1,8 +1,8 @@
 <?php
 
 $servername = "localhost";
-$username = "123";
-$password = "111";
+$username = "";
+$password = "";
 $dbname = "GrayWorkFlow";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -11,17 +11,30 @@ if (!$conn) {
 }
 $conn->query("set names utf8");
 
+function ifUserExist($conn,$user_name){
+    $user_if_exist = $conn->prepare("SELECT user_name FROM user where user_name = ?");
+    // var_dump($user_if_exist);
+    $user_if_exist->bind_parem("s",$user_name);
+    $user_if_exist->excute();
+    if(!($user_if_exist->get_result()->num_rows)){
+        return TRUE;
+    }
+    return FALSE;
+}
+
 function addUser($conn,$user_name,$user_password,$user_qq){
-    $insert_user = $conn->prepare("INSERT INTO user(user_name,user_password,user_qq) VALUES (?,?,?)");
+    // if(ifUserExist($conn,$user_name)){
+    //     return FALSE;
+    // }
+    $insert_user = $conn->prepare("INSERT INTO user(user_id,user_name,user_password,user_qq) SELECT (IFNULL(max(user_id),0) + 1),?,?,? from user;");
+    // var_dump($insert_user);
+    exit();
     $insert_user -> bind_param("sss", $user_name, $user_password, $user_qq);
-    $user_name = 'ttt测试';
-    $user_password = '1212112aqa';
-    $user_qq = '112346678';
     $result = $insert_user->execute();
-    // $result = $conn->query('SELECT * FROM user');
-    // var_dump($result->fetch_all(MYSQLI_ASSOC));
     !$result&&print($conn->error.PHP_EOL);
+    $id = $conn->query("select max(user_id) from user")->fetch_assoc()['max(user_id)'];
     $conn->close();
+    return $id;
 }
 
 function getUserInfo($conn,$user_id){
@@ -37,12 +50,15 @@ function getUserInfo($conn,$user_id){
 function verifyPassword($conn,$user_name,$user_password){
     $verify_password = $conn->prepare("SELECT user_id FROM user where user_name = ? and user_password = ?");
     $verify_password->bind_param('ss', $user_name,$user_password);
-    $user_name='admin';
-    $user_password='admin';
     $verify_password->execute();
     $result = $verify_password->get_result();
-    print_r($result->num_rows);
+    if(!$result->num_rows){
+        return FALSE;
     }
+    $user_id = $result->fetch_assoc()['user_id'];
+    return [TRUE,$user_id];
+}
 
+// addUser($conn,'1','1','1');
 
 ?>
