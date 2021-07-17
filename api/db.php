@@ -3,7 +3,7 @@
 $servername = "localhost";
 $username = "";
 $password = "";
-$dbname = "GrayWorkFlow";
+$dbname = "";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if (!$conn) {
@@ -11,46 +11,63 @@ if (!$conn) {
 }
 $conn->query("set names utf8");
 
-function ifUserExist($conn,$user_name){
-    $user_if_exist = $conn->prepare("SELECT user_name FROM user where user_name = ?");
-    // var_dump($user_if_exist);
-    $user_if_exist->bind_parem("s",$user_name);
-    $user_if_exist->excute();
-    if(!($user_if_exist->get_result()->num_rows)){
+function ifUserExist($conn, string $user_name){
+    /** @var mysqli_stmt $user_if_exist */
+    $user_if_exist = $conn->prepare("SELECT `user_name` FROM `user` where `user_name` = ?");
+    $user_if_exist->bind_param("s",$user_name);
+    $user_if_exist->execute();
+
+    /** @var mysqli_result $result */
+    $result = $user_if_exist->get_result();
+
+    if($result->num_rows){
         return TRUE;
     }
     return FALSE;
 }
 
-function addUser($conn,$user_name,$user_password,$user_qq){
-    // if(ifUserExist($conn,$user_name)){
-    //     return FALSE;
-    // }
-    $insert_user = $conn->prepare("INSERT INTO user(user_id,user_name,user_password,user_qq) SELECT (IFNULL(max(user_id),0) + 1),?,?,? from user;");
-    // var_dump($insert_user);
-    exit();
-    $insert_user -> bind_param("sss", $user_name, $user_password, $user_qq);
-    $result = $insert_user->execute();
-    !$result&&print($conn->error.PHP_EOL);
-    $id = $conn->query("select max(user_id) from user")->fetch_assoc()['max(user_id)'];
-    $conn->close();
-    return $id;
+function addUser($conn, string $user_name, string $user_password, string $user_qq){
+     if(ifUserExist($conn, $user_name)){
+         return FALSE;
+     }
+
+     /** @var mysqli_stmt $insert_user */
+     $insert_user = $conn->prepare("
+        INSERT INTO `user`(`user_id`, `user_name`, `user_password`, `user_qq`) 
+        SELECT (IFNULL(max(user_id), 0) + 1), ?, ?, ? 
+        FROM `user`;                ");
+     $insert_user->bind_param("sss", $user_name, $user_password, $user_qq);
+     $insert_user->execute();
+
+//     我觉得INSERT应该不需要查这个，如果需要的话可以查insert_id
+//     /** @var mysqli_result|bool $result */
+//     $result = $insert_user->get_result();
+//    !$result && print($conn->error . PHP_EOL);
+
+     $id = $conn->query("SELECT max(user_id) FROM `user`")->fetch_assoc()['max(user_id)'];
+     $conn->close();
+     return $id;
 }
 
-function getUserInfo($conn,$user_id){
-    $get_user_info = $conn->prepare("SELECT * FROM user where user_id = ?");
+function getUserInfo($conn, int $user_id){
+    /** @var mysqli_stmt $get_user_info */
+    $get_user_info = $conn->prepare("SELECT * FROM `user` where `user_id` = ?;");
     $get_user_info->bind_param("i",$user_id);
-    $user_id = 0;
     $get_user_info->execute();
+
+    /** @var mysqli_result $result */
     $result = $get_user_info->get_result();
-    // $result = $result->num_rows;
-    !$result->num_rows&&print_r('1');
+    if(!$result) { return false; }
+    return true;
 }
 
-function verifyPassword($conn,$user_name,$user_password){
-    $verify_password = $conn->prepare("SELECT user_id FROM user where user_name = ? and user_password = ?");
+function verifyPassword($conn, string $user_name, string $user_password){
+    /** @var mysqli_stmt $verify_password */
+    $verify_password = $conn->prepare("SELECT `user_id` FROM `user` WHERE `user_name` = ? AND `user_password` = ?;");
     $verify_password->bind_param('ss', $user_name,$user_password);
     $verify_password->execute();
+
+    /** @var mysqli_result $result */
     $result = $verify_password->get_result();
     if(!$result->num_rows){
         return FALSE;
@@ -59,6 +76,18 @@ function verifyPassword($conn,$user_name,$user_password){
     return [TRUE,$user_id];
 }
 
-// addUser($conn,'1','1','1');
-
-?>
+if($id = addUser($conn,'1','1','1')) {
+    var_dump($id);
+    echo "<br>\n";
+}else {
+    echo "add user fail<br>\n";
+}
+if(getUserInfo($conn, 1)){
+    echo "get info OK.<br>\n";
+}
+if(is_array($ret = verifyPassword($conn, '1', '1'))) {
+    echo "verify OK.<br>\n";
+    echo "id: " . $ret[1] . "<br>\n";
+}else{
+    echo "verify fail.<br>\n";
+}
