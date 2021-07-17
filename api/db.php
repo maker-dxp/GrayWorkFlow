@@ -1,4 +1,10 @@
 <?php
+require_once 'function.php';
+if(!defined('IN_SYS')) {
+    echo('{"message":"禁止访问","code":403}');
+    sendHttpStatus(403);
+    exit();
+}
 
 $servername = "localhost";
 $dbusername = "";
