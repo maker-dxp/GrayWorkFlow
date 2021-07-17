@@ -7,7 +7,7 @@ require_once 'function.php';
 
 use Firebase\JWT\JWT;
 
-function createToken(string $username,int $userid,int $usergroup=-1){
+function createToken($username,$userid,$usergroup='Undefined'){
     include_once 'Firebase/JWT/JWT.php';
     include_once 'Firebase/JWT/SignatureInvalidException.php';
     include_once 'Firebase/JWT/BeforeValidException.php';
@@ -29,7 +29,7 @@ function createToken(string $username,int $userid,int $usergroup=-1){
 }
 
 // $token：签发的token
-function verifyToken(string $token){
+function verifyToken($token){
     include_once 'Firebase/JWT/JWT.php';
     include_once 'Firebase/JWT/SignatureInvalidException.php';
     include_once 'Firebase/JWT/BeforeValidException.php';
@@ -79,7 +79,20 @@ function getBearerToken(){
     return null;
 }
 
-function analyJson(string $json_str){
+function getKeyinArrayNum($key,$array){
+    //凑数用的, 之后肯定会删掉, 不解释
+    $n = 0;
+    foreach(array_keys($array) as $each){
+        // echo($each.' '.$key.'|');
+        if($key==$each){
+            return $n;
+        }
+        $n++;
+    }
+    return -1;
+}
+
+function analyJson($json_str){
     //验证传入 JSON 的格式并返回 Array, 若格式有误则返回 False
     $out = json_decode($json_str,true);
     if(!json_last_error() == JSON_ERROR_NONE){

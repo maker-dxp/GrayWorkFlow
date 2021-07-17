@@ -7,8 +7,8 @@ if(!defined('IN_SYS')) {
 }
 
 $servername = "localhost";
-$dbusername = "";
-$dbpassword = "";
+$dbusername = "GrayWorkFlow";
+$dbpassword = "GrayWorkFlow";
 $dbname = "GrayWorkFlow";
 
 $conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
@@ -17,7 +17,7 @@ if (!$conn) {
 }
 $conn->query("set names utf8");
 
-function ifUserExist($conn, string $user_name){
+function ifUserExist(mysqli $conn, string $user_name){
     /** @var mysqli_stmt $user_if_exist */
     $user_if_exist = $conn->prepare("SELECT `user_name` FROM `user` where `user_name` = ?");
     $user_if_exist->bind_param("s",$user_name);
@@ -32,7 +32,7 @@ function ifUserExist($conn, string $user_name){
     return FALSE;
 }
 
-function addUser($conn, string $user_name, string $user_password, string $user_qq){
+function addUser(mysqli $conn, string $user_name, string $user_password, string $user_qq){
     if (ifUserExist($conn, $user_name)) {
         return FALSE;
     }
@@ -45,7 +45,7 @@ function addUser($conn, string $user_name, string $user_password, string $user_q
     return $id;
 }
 
-function getUserInfo($conn, int $user_id){
+function getUserInfo(mysqli $conn, int $user_id){
     /** @var mysqli_stmt $get_user_info */
     $get_user_info = $conn->prepare("SELECT * FROM `user` where `user_id` = ?;");
     $get_user_info->bind_param("i",$user_id);
@@ -56,7 +56,7 @@ function getUserInfo($conn, int $user_id){
     return true;
 }
 
-function verifyPassword($conn, string $user_name, string $user_password){
+function verifyPassword(mysqli $conn, string $user_name, string $user_password){
     /** @var mysqli_stmt $verify_password */
     $verify_password = $conn->prepare("SELECT `user_id` FROM `user` WHERE `user_name` = ? AND `user_password` = ?;");
     $verify_password->bind_param('ss', $user_name,$user_password);

@@ -7,9 +7,9 @@ if(!defined('IN_SYS')) {
 
 function is_get():bool{return $_SERVER['REQUEST_METHOD'] == 'GET' ? true : false;}
 function is_post():bool{return $_SERVER['REQUEST_METHOD'] == 'POST' ? true : false;}
-function _echo($i){echo $i;return true;}    //echo函数化
+function _echo(string $i){echo $i;return true;}    //echo函数化
 
-function sendHttpStatus($code) {
+function sendHttpStatus(int $code) {
     static $_status = array(
             // Informational 1xx
             100 => 'Continue',
