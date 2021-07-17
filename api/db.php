@@ -1,11 +1,11 @@
 <?php
 
 $servername = "localhost";
-$username = "";
-$password = "";
-$dbname = "";
+$dbusername = "";
+$dbpassword = "";
+$dbname = "GrayWorkFlow";
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
 if (!$conn) {
     die("Connection failed: " . mysqli_connect_error() . PHP_EOL);
 }
@@ -27,26 +27,16 @@ function ifUserExist($conn, string $user_name){
 }
 
 function addUser($conn, string $user_name, string $user_password, string $user_qq){
-     if(ifUserExist($conn, $user_name)){
-         return FALSE;
-     }
-
-     /** @var mysqli_stmt $insert_user */
-     $insert_user = $conn->prepare("
-        INSERT INTO `user`(`user_id`, `user_name`, `user_password`, `user_qq`) 
-        SELECT (IFNULL(max(user_id), 0) + 1), ?, ?, ? 
-        FROM `user`;                ");
-     $insert_user->bind_param("sss", $user_name, $user_password, $user_qq);
-     $insert_user->execute();
-
-//     我觉得INSERT应该不需要查这个，如果需要的话可以查insert_id
-//     /** @var mysqli_result|bool $result */
-//     $result = $insert_user->get_result();
-//    !$result && print($conn->error . PHP_EOL);
-
-     $id = $conn->query("SELECT max(user_id) FROM `user`")->fetch_assoc()['max(user_id)'];
-     $conn->close();
-     return $id;
+    if (ifUserExist($conn, $user_name)) {
+        return FALSE;
+    }
+    /** @var mysqli_stmt $insert_user */
+    $insert_user = $conn->prepare("INSERT INTO `user`(`user_id`, `user_name`, `user_password`, `user_qq`) SELECT (IFNULL(max(user_id), 0) + 1), ?, ?, ? FROM `user`;");
+    $insert_user->bind_param("sss", $user_name, $user_password, $user_qq);
+    $insert_user->execute();
+    $id = $conn->query("SELECT max(user_id) FROM `user`")->fetch_assoc()['max(user_id)'];
+    $conn->close();
+    return $id;
 }
 
 function getUserInfo($conn, int $user_id){
@@ -54,7 +44,6 @@ function getUserInfo($conn, int $user_id){
     $get_user_info = $conn->prepare("SELECT * FROM `user` where `user_id` = ?;");
     $get_user_info->bind_param("i",$user_id);
     $get_user_info->execute();
-
     /** @var mysqli_result $result */
     $result = $get_user_info->get_result();
     if(!$result) { return false; }
@@ -66,7 +55,6 @@ function verifyPassword($conn, string $user_name, string $user_password){
     $verify_password = $conn->prepare("SELECT `user_id` FROM `user` WHERE `user_name` = ? AND `user_password` = ?;");
     $verify_password->bind_param('ss', $user_name,$user_password);
     $verify_password->execute();
-
     /** @var mysqli_result $result */
     $result = $verify_password->get_result();
     if(!$result->num_rows){
@@ -76,18 +64,5 @@ function verifyPassword($conn, string $user_name, string $user_password){
     return [TRUE,$user_id];
 }
 
-if($id = addUser($conn,'1','1','1')) {
-    var_dump($id);
-    echo "<br>\n";
-}else {
-    echo "add user fail<br>\n";
-}
-if(getUserInfo($conn, 1)){
-    echo "get info OK.<br>\n";
-}
-if(is_array($ret = verifyPassword($conn, '1', '1'))) {
-    echo "verify OK.<br>\n";
-    echo "id: " . $ret[1] . "<br>\n";
-}else{
-    echo "verify fail.<br>\n";
-}
+
+?>
