@@ -4,4 +4,5 @@ RewriteCond %{HTTP:Authorization} ^(.+)$
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
 RewriteRule ^auth/(.*)$ auth.php?action=$1
+RewriteRule ^user/(.*)$ user.php?action=$1
 # RewriteRule auth.html auth.php
