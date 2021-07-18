@@ -20,7 +20,11 @@
           <div style="margin-top: 12px">工作平台</div>
         </div>
         <div style="height: 66%" class="login-form login-form-container">
-          <el-form>
+          <el-form
+            ref="loginForm"
+            :model="loginForm"
+            :rules="loginRules"
+          >
             <el-form-item>
               <el-input placeholder="账户名"></el-input>
             </el-form-item>
@@ -45,6 +49,7 @@
               <el-button
                 style="width: 100%;height: 46px"
                 type="primary"
+                @click="handleLogin()"
               >登录</el-button>
             </el-form-item>
           </el-form>
@@ -159,24 +164,6 @@ export default {
         return acc
       }, {})
     }
-    // afterQRScan() {
-    //   if (e.key === 'x-admin-oauth-code') {
-    //     const code = getQueryObject(e.newValue)
-    //     const codeMap = {
-    //       wechat: 'code',
-    //       tencent: 'code'
-    //     }
-    //     const type = codeMap[this.auth_type]
-    //     const codeName = code[type]
-    //     if (codeName) {
-    //       this.$store.dispatch('LoginByThirdparty', codeName).then(() => {
-    //         this.$router.push({ path: this.redirect || '/' })
-    //       })
-    //     } else {
-    //       alert('第三方登录失败')
-    //     }
-    //   }
-    // }
   }
 }
 </script>
