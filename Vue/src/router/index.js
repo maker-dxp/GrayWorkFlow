@@ -104,7 +104,7 @@ export const constantRoutes = [
       {
         hidden:true,
         path: 'UserDetails',
-        component: () => import('@/views/User/Profile/index'),
+        component: () => import('@/views/User/Admin/test'),
         name: 'UserDetails',
         meta: { title: '用户详情' }
       }
