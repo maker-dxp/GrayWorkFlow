@@ -8,10 +8,10 @@ URL :  /User/login
 
 Request:
 
->> Header:
->> | key | value |
->> | ---- | ---- |
->> |  none | none |
+> Header:
+> | key | value |
+> | ---- | ---- |
+> |  none | none |
 
 Params:
 
@@ -22,10 +22,10 @@ Params:
 ----------------------------------------
 Response:
 
->>Header:
->>|  Key   | Value  |
->>|  ----  | ----  |
->>| Access-Token: | 'jwt-token' |
+>Header:
+>|  Key   | Value  |
+>|  ----  | ----  |
+>| Access-Token: | 'jwt-token' |
 
 Body:
 
@@ -51,10 +51,10 @@ URL : /User/MyInfo
 
 Request:
 
->>Header:
->>| key | value |
->>| ---- | ---- |
->>| Access-Token: | 'jwt-token' |
+>Header:
+>| key | value |
+>| ---- | ---- |
+>| Access-Token: | 'jwt-token' |
 
 Params: None
 
@@ -62,10 +62,10 @@ Params: None
 
 Response:
 
->> Header:
->> | key | value |
->> | ---- | ---- |
->> |  none | none |
+> Header:
+> | key | value |
+> | ---- | ---- |
+> |  none | none |
 
 Body:
 
@@ -91,10 +91,10 @@ URL : /User/Account/ChangePWD
 
 Request:
 
->> Header:
->> | key | value |
->> | ---- | ---- |
->> |  Access-Token | 'jwt-token' |
+> Header:
+> | key | value |
+> | ---- | ---- |
+> |  Access-Token | 'jwt-token' |
 
 Params:
 
