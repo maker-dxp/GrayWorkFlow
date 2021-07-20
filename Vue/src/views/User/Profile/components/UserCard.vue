@@ -1,23 +1,22 @@
 <template>
   <el-card style="margin-bottom:20px;">
     <div slot="header" class="clearfix">
-      <span>About me</span>
+      <span>关于我</span>
     </div>
 
     <div class="user-profile">
       <div class="box-center">
         <el-image
-          style="width: 128px;height: 128px;border-radius: 50%"
+          class="user-images"
           :fit="'cover'"
           :src="user.avatar"
-        ></el-image>
+        />
       </div>
       <div class="box-center">
         <div class="user-name text-center">{{ user.name }}</div>
         <div class="user-role text-center text-muted">{{ user.role | uppercaseFirst }}</div>
       </div>
     </div>
-
     <div class="user-bio">
       <div class="user-education user-bio-section">
         <div class="user-bio-section-header"><svg-icon icon-class="education" /><span>Education</span></div>
@@ -27,7 +26,6 @@
           </div>
         </div>
       </div>
-
       <div class="user-skills user-bio-section">
         <div class="user-bio-section-header"><svg-icon icon-class="skill" /><span>Skills</span></div>
         <div class="user-bio-section-body">
@@ -72,7 +70,18 @@ export default {
   }
 }
 </script>
+<style>
+.user-images{
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  position: relative;
+}
+.user-images-mask{
 
+}
+
+</style>
 <style lang="scss" scoped>
 .box-center {
   margin: 0 auto;

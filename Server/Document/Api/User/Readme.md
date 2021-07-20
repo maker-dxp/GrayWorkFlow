@@ -9,6 +9,7 @@ URL :  /User/login
 Request:
 
 > Header:
+>
 > | key | value |
 > | ---- | ---- |
 > |  none | none |
@@ -23,6 +24,7 @@ Params:
 Response:
 
 >Header:
+> 
 >|  Key   | Value  |
 >|  ----  | ----  |
 >| Access-Token: | 'jwt-token' |
@@ -52,6 +54,7 @@ URL : /User/MyInfo
 Request:
 
 >Header:
+> 
 >| key | value |
 >| ---- | ---- |
 >| Access-Token: | 'jwt-token' |
@@ -63,6 +66,7 @@ Params: None
 Response:
 
 > Header:
+> 
 > | key | value |
 > | ---- | ---- |
 > |  none | none |
@@ -73,11 +77,7 @@ Body:
         code:200,
         message:'ok',
         data:{
-            UserName:'FeiBam',
-            Point:10,
-            Icon:'https://static.GrayWindTech.com/',
-            Permission:['admin'],
-            LastLoginAt:"yyyy-mm-dd",
+            UserName:'FeiBam'
         }
     }
 
@@ -92,6 +92,7 @@ URL : /User/Account/ChangePWD
 Request:
 
 > Header:
+> 
 > | key | value |
 > | ---- | ---- |
 > |  Access-Token | 'jwt-token' |

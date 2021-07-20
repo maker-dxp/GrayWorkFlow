@@ -16,10 +16,20 @@
               <el-tab-pane label="账户" name="account">
                 <account :user="user" />
               </el-tab-pane>
+              <el-tab-pane label="头像" name="avatar">
+                <el-upload
+                  class="avatar-upload"
+                  drag
+                  action="https://jsonplaceholder.typicode.com/posts/"
+                  multiple>
+                  <i class="el-icon-upload"></i>
+                  <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                  <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
+                </el-upload>
+              </el-tab-pane>
             </el-tabs>
           </el-card>
         </el-col>
-
       </el-row>
     </div>
   </div>
@@ -37,7 +47,7 @@ export default {
   data() {
     return {
       user: {},
-      activeTab: 'account'
+      activeTab: 'history'
     }
   },
   computed: {
@@ -62,3 +72,11 @@ export default {
   }
 }
 </script>
+
+<style>
+.avatar-upload{
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+</style>
