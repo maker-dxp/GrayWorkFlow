@@ -80,7 +80,7 @@
 
 <script>
 export default {
-  name: "index",
+  name: "Admin_Users",
   data(){
       return{
         dialogVisible:false,

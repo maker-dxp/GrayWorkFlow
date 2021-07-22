@@ -78,8 +78,61 @@ export const constantRoutes = [
       {
         path: 'dashboard',
         component: () => import('@/views/dashboard/index'),
-        name: 'Dashboard',
+        name: 'dashboard',
         meta: { title: '首页', icon: 'dashboard', affix: true }
+      }
+    ]
+  },
+  {
+    name: 'project',
+    path: '/project',
+    component: Layout,
+    redirect: '/project/list',
+    meta: {
+      title: '项目',
+      icon: 'list',
+      roles: [
+        'admin',
+        'super_admin',
+        'translation',
+        'translation_proofreading',
+        'time_axis',
+        'time_axis_proofreading',
+        'subtitle',
+        'subtitle_proofreading',
+        'compression',
+        'back_support',
+      ]
+    },
+    children: [
+      {
+        name: 'project_list',
+        path: 'list',
+        component: () => import('@/views/Admin/Users/index'),
+        meta: {
+          title: '项目列表',
+          icon: 'tree-table',
+          affix: false
+        },
+      },
+      {
+        name: 'project_history',
+        path: 'history',
+        component: () => import('@/views/Admin/Users/index'),
+        meta: {
+          title: '项目历史',
+          icon: 'table',
+          affix: false,
+        },
+      },
+      {
+        name:'project_details',
+        path: 'details',
+        component: () => import('@/views/Admin/Users/index'),
+        hidden: true,
+        meta: {
+          title: '项目详情',
+        }
       }
     ]
   },
@@ -87,26 +140,51 @@ export const constantRoutes = [
     path: '/User',
     component: Layout,
     redirect: '/User/Profile',
+    hidden: true,
     meta:{ title:'用户', icon: 'user'},
     children: [
       {
         path: 'Profile',
+        hidden: true,
         component: () => import('@/views/User/Profile/index'),
         name: 'Profile',
         meta: { title: '个人中心', icon: 'user', affix: false },
       },
+    ]
+  },
+  {
+    name:'Admin',
+    path: '/Admin',
+    component: Layout,
+    redirect: '/Admin/Users',
+    meta: {
+      roles: ['admin', 'super_admin'],
+      title: '管理员',
+      icon: 'edit'
+    },
+    children: [
       {
-        path: 'Admin',
-        component: () => import('@/views/User/Admin/index'),
-        name: 'Admin',
-        meta: { title: '用户管理', icon:'edit', affix: true},
+        name:'admin_users',
+        path: 'Users',
+        component: () => import('@/views/Admin/Users/index'),
+        meta : {
+          roles: ['admin', 'super_admin'],
+          title: '用户管理',
+          icon: 'edit',
+          affix: false
+        }
       },
       {
-        hidden:true,
-        path: 'UserDetails',
-        component: () => import('@/views/User/Admin/test'),
-        name: 'UserDetails',
-        meta: { title: '用户详情' }
+        name:'admin_projects',
+        path:'projects',
+        component: () => import('@/views/Admin/Users/index'),
+        meta : {
+          roles: ['admin', 'super_admin'],
+          title: '项目管理',
+          icon: 'edit',
+          affix: false
+        }
+
       }
     ]
   }

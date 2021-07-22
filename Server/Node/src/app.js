@@ -1,10 +1,18 @@
-const express = require('express')
-const app = express()
+const Koa = require('koa')
+const KoaCors = require('@koa/cors')
+const KoaBody = require('koa-bodyparser')
+
+const { Router } = require('./routes/index')
 
 
-app.use(async (req,res) => {
-    res.status(200)
-    res.send('hello world')
+
+const App = new Koa()
+console.log(Router.Router)
+
+App.use(async (ctx,next)=>{
+    console.log(ctx)
+    await next()
 })
+App.use(Router.Router.routes())
 
-app.listen(8080)
+App.listen(8080)
