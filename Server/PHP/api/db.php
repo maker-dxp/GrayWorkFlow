@@ -1,10 +1,5 @@
 <?php
 require_once 'function.php';
-if(!defined('IN_SYS')) {
-    echo('{"message":"禁止访问","code":403}');
-    sendHttpStatus(403);
-    exit();
-}
 
 $servername = "localhost";
 $dbusername = "GrayWorkFlow";
@@ -69,6 +64,3 @@ function verifyPassword(mysqli $conn, string $user_name, string $user_password){
     $user_id = $result->fetch_assoc()['user_id'];
     return [TRUE,$user_id];
 }
-
-
-?>

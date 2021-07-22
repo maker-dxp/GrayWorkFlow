@@ -1,13 +1,12 @@
 <?php
-if(!defined('IN_SYS')) {
-    echo('{"message":"禁止访问","code":403}');
-    sendHttpStatus(403);
-    exit();
+
+function is_get(): bool{
+    return $_SERVER['REQUEST_METHOD'] == 'GET' ? true : false;
 }
 
-function is_get():bool{return $_SERVER['REQUEST_METHOD'] == 'GET' ? true : false;}
-function is_post():bool{return $_SERVER['REQUEST_METHOD'] == 'POST' ? true : false;}
-function _echo(string $i){echo $i;return true;}    //echo函数化
+function is_post(): bool{
+    return $_SERVER['REQUEST_METHOD'] == 'POST' ? true : false;
+}
 
 function sendHttpStatus(int $code) {
     static $_status = array(
@@ -67,5 +66,47 @@ function sendHttpStatus(int $code) {
     return true;
 }
 
+function workInfo() {
+    include_once 'auth.php';
+    include_once 'work_area.php';
+    //验证token
+    if(!isset($_COOKIE['token'])) {
+        sendResponse(NOT_LOGGED_IN);
+    }elseif(!verifyToken($_COOKIE['token'])) {
+        sendResponse(TOKEN_IS_INCORRECT);
+    }
 
-?>
+    $body = analyJson(file_get_contents("php://input"));
+    if(!$body) {
+        sendResponse(WRONG_JSON);
+    }
+
+    switch(true){
+        case is_post():
+            if(!isset($body['infos']) || !isset($body['authority'])) {
+                sendResponse(EMPTY_BODY_FIELD);
+            }
+
+            $ret = setWorkInfo($conn, $body['infos'], $body['authority']);
+            sendResponse(
+                OK,
+                NULL,
+                ($ret) ? '成功' : '失败'
+            );
+            break;
+        case is_get():
+            if(!isset($body['vid']) || !isset($body['authority'])) {
+                sendResponse(EMPTY_BODY_FIELD);
+            }
+
+            $ret = getWorkInfo($conn, $body['vid'], $body['authority']);
+            sendResponse(
+                OK,
+                $ret,
+                ($ret) ? '成功' : '失败'
+            );
+            break;
+        default:
+            sendResponse(INVALID_REQUEST);
+    }
+}
