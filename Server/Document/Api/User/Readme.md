@@ -27,7 +27,7 @@ Response:
 > 
 >|  Key   | Value  |
 >|  ----  | ----  |
->| Access-Token: | 'jwt-token' |
+>| Access-Token: | {jwt-token} |
 
 Body:
 
@@ -57,7 +57,7 @@ Request:
 > 
 >| key | value |
 >| ---- | ---- |
->| Access-Token: | 'jwt-token' |
+>| Access-Token: | {jwt-token} |
 
 Params: None
 
@@ -95,7 +95,7 @@ Request:
 > 
 > | key | value |
 > | ---- | ---- |
-> |  Access-Token | 'jwt-token' |
+> |  Access-Token | {jwt-token} |
 
 Params:
 

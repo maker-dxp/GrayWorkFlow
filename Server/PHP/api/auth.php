@@ -2,8 +2,6 @@
 // error_reporting (E_ALL || ~E_NOTICE);
 ini_set("display_errors", "On");
 error_reporting(E_ALL | E_STRICT);
-define('IN_SYS', TRUE);
-require_once 'function.php';
 
 use Firebase\JWT\JWT;
 
@@ -104,60 +102,102 @@ function analyJson($json_str){
 }
 
 function dologin(){
-    !is_post()&&_echo('{"message":"Method Not Allowed","code":405}')&&sendHttpStatus(405)&&exit();
-    !file_get_contents("php://input")&&_echo('{"message":"Body为空","code":4002}')&&sendHttpStatus(400)&&exit();
-    !analyJson(file_get_contents("php://input"))&&_echo('{"message":"Json格式有误","code":4001}')&&sendHttpStatus(400)&&exit();
+    include_once 'db.php';
+//    !is_post()&&_echo('{"message":"Method Not Allowed","code":405}')&&sendHttpStatus(405)&&exit();
+    if(!is_post()) {
+        sendHttpStatus(405);
+        sendResponse(FUNC_DENIED);
+    }
+
+//    !file_get_contents("php://input")&&_echo('{"message":"Body为空","code":4002}')&&sendHttpStatus(400)&&exit();
+    if(!file_get_contents("php://input")) {
+        sendHttpStatus(400);
+        sendResponse(EMPTY_BODY);
+    }
+
+//    !analyJson(file_get_contents("php://input"))&&_echo('{"message":"Json格式有误","code":4001}')&&sendHttpStatus(400)&&exit();
+    if(!analyJson(file_get_contents("php://input"))) {
+        sendHttpStatus(400);
+        sendResponse(WRONG_JSON);
+    }
+
     //判断请求合法性
     $in = analyJson(file_get_contents("php://input"));
     if(array_key_exists('UserName',$in) && array_key_exists('Password',$in)){
-        include_once 'db.php';
         $username = $in['UserName'];
         $password = $in['Password'];
         $req = verifyPassword($conn,$username,$password);
-        !$req&&_echo('{"message":"用户名或密码不正确","code":4010}')&&sendHttpStatus(401)&&exit();
+//        !$req&&_echo('{"message":"用户名或密码不正确","code":4010}')&&sendHttpStatus(401)&&exit();
+        if(!$req) {
+            sendHttpStatus(401);
+            sendResponse(NOT_LOGGED_IN);
+        }
         $id = $req[1];
         $token = createToken($username,$id);
-        $data = ['message'=>'登录成功','code'=>200,'data'=>['UserName'=>$username,'Token'=>$token,'id'=>$id]];
-        echo(json_encode($data));
+        $data = ['UserName'=>$username,'Token'=>$token,'id'=>$id];
+        sendResponse(LOGIN_SUCCESS, $data);
     } else {
-        echo('{"message":"非法请求","code":4002}');
         sendHttpStatus(400);
+        sendResponse(INVALID_REQUEST);
     }
 }
 
 function doCreateUser(){
-    !is_post()&&_echo('{"message":"Method Not Allowed","code":405}')&&sendHttpStatus(405)&&exit();
-    !verifyToken(getBearerToken())&&exit();
-    !file_get_contents("php://input")&&_echo('{"message":"Body为空","code":4000}')&&sendHttpStatus(400)&&exit();
-    !analyJson(file_get_contents("php://input"))&&_echo('{"message":"Json格式有误","code":4001}')&&sendHttpStatus(400)&&exit();
+    include_once 'db.php';
+//    !is_post()&&_echo('{"message":"Method Not Allowed","code":405}')&&sendHttpStatus(405)&&exit();
+    if(!is_post()) {
+        sendHttpStatus(405);
+        sendResponse(FUNC_DENIED);
+    }
+
+//    !verifyToken(getBearerToken())&&exit();
+    //没看懂
+//    if(!verifyToken(getBearerToken())) {
+//        exit();
+//    }
+
+//    !file_get_contents("php://input")&&_echo('{"message":"Body为空","code":4000}')&&sendHttpStatus(400)&&exit();
+    if(!file_get_contents("php://input")) {
+        sendHttpStatus(400);
+        sendResponse(EMPTY_BODY);
+    }
+
+//    !analyJson(file_get_contents("php://input"))&&_echo('{"message":"Json格式有误","code":4001}')&&sendHttpStatus(400)&&exit();
+    if(!analyJson(file_get_contents("php://input"))) {
+        sendHttpStatus(400);
+        sendResponse(WRONG_JSON);
+    }
+
     //判断请求合法性
     $in = json_decode(file_get_contents("php://input"),true);
     if(array_key_exists('UserName',$in) && array_key_exists('Password',$in) && array_key_exists('UserQQ',$in)){
         $username = $in['UserName'];
         $password = $in['Password'];
         $qq = $in['UserQQ'];
-        include 'db.php';
-        $id = addUser($conn,$username,$password,$qq);
-        !$id&&_echo('{"message":"用户名已存在","code":4090}')&&sendHttpStatus(409)&&exit();
-        $data = ['message'=>'创建成功','code'=>200,'data'=>['UserName'=>$username,'Password'=>$password,'id'=>$id]];
-        echo(json_encode($data));
+        $id = addUser($conn, $username, $password, $qq);
+
+//        !$id&&_echo('{"message":"用户名已存在","code":4090}')&&sendHttpStatus(409)&&exit();
+        if(!$id) {
+            sendHttpStatus(409);
+            sendResponse(USER_EXIST);
+        }
+
+        $data = ['UserName'=>$username,'Password'=>$password,'id'=>$id];
+        sendResponse(REGISTER_SUCCESS, $data);
     } else {
-        echo('{"message":"Body字段缺失","code":4002}');
         sendHttpStatus(400);
+        sendResponse(EMPTY_BODY_FIELD);
     }
 }
 
-header('Content-type: application/json');
-switch ($_GET['action']){
-case "login":
-    dologin();
-    break;
-case "createUser":
-    doCreateUser();
-    break;
-    default:
-    echo('{"message":"无效的请求","code":400}');
-    sendHttpStatus(400);
-}
-
-?>
+//switch ($_GET['action']){
+//case "login":
+//    dologin();
+//    break;
+//case "createUser":
+//    doCreateUser();
+//    break;
+//    default:
+//        sendHttpStatus(400);
+//        sendResponse(INVALID_REQUEST);
+//}
