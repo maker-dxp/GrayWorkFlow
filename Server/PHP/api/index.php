@@ -1,21 +1,28 @@
 <?php
 
-include_once 'response.php';
+/**
+ * 程序入口
+ */
 
-//路由表常量
+//路由表常量 - 暂时不用 保留
 const FILE  =   0;
 const FUNC  =   1;
 
-//路由表
+//路由表 - 所有的函数都位于function.php
 /*
  * 路由表写法：
- *  [路由] => array( 0=>[文件名], 1=>[函数] )
+ *  [路由] => [函数]
  */
 const ROUTE_MAP = array(
-    '/api/users/login' => ['auth.php', 'doLogin'],
-    '/api/users/createUser' => ['auth.php', 'doCreateUser'],
-    '/api/works/info' => ['function.php', 'workInfo']
-//    '/api/test' => ['index.php', 'test']         //测试代码
+    '/api/user/login'       =>      'userLoginEntry',
+    '/api/user/info'        =>      'userInfoEntry',
+    '/api/user/pwd'         =>      'userPwdEntry',
+    '/api/user/name'        =>      'userNameEntry',
+    '/api/user/jobs'        =>      'userJobsEntry',
+    '/api/video/info'       =>      'videoInfoEntry',
+    '/api/video'            =>      'videoEntry',
+    '/api/task/info'        =>      'taskInfoEntry',
+    '/api/task'             =>      'taskEntry'
 );
 
 function getRequestUri(): string {
@@ -56,26 +63,31 @@ function getRequestUri(): string {
 }
 
 function route() {
+    include_once 'function.php';
     $fullPath = getRequestUri();
-    if($pos = strpos($fullPath, '?')) {
+    if ($pos = strpos($fullPath, '?')) {
         $path = substr($fullPath, 0, $pos);
-    }else {
+    } else {
         $path = $fullPath;
     }
 
-    if(!isset(ROUTE_MAP[$path]) && !file_exists(ROUTE_MAP[$path][FILE])) {
+    if (!isset(ROUTE_MAP[$path])) {
         sendHttpStatus(400);
         sendResponse(FUNC_DENIED);
     }
 
-    include_once ROUTE_MAP[$path][FILE];
-    call_user_func(ROUTE_MAP[$path][FUNC]);
+    call_user_func(ROUTE_MAP[$path]);
 }
-//测试代码
-//function test() {
-//    $code = (int)$_GET['code'];
-//    sendResponse($code);
-//}
 
-//开始路由
+function exceptionHandle($exception) {
+    include_once 'response.php';
+
+    sendHttpStatus(500);
+    sendResponse(SERVER_ERROR);
+}
+
+/** 设置异常和错误处理 */
+set_exception_handler('exceptionHandle');
+set_error_handler('exceptionHandle');
+
 route();

@@ -1,112 +1,156 @@
 <?php
 
-function is_get(): bool{
-    return $_SERVER['REQUEST_METHOD'] == 'GET' ? true : false;
-}
+/**
+ * 所有的功能入口文件
+ */
 
-function is_post(): bool{
-    return $_SERVER['REQUEST_METHOD'] == 'POST' ? true : false;
-}
+include_once 'db.php';
+include_once 'user.php';
+include_once 'request.php';
 
-function sendHttpStatus(int $code) {
-    static $_status = array(
-            // Informational 1xx
-            100 => 'Continue',
-            101 => 'Switching Protocols',
-            // Success 2xx
-            200 => 'OK',
-            201 => 'Created',
-            202 => 'Accepted',
-            203 => 'Non-Authoritative Information',
-            204 => 'No Content',
-            205 => 'Reset Content',
-            206 => 'Partial Content',
-            // Redirection 3xx
-            300 => 'Multiple Choices',
-            301 => 'Moved Permanently',
-            302 => 'Moved Temporarily ',  // 1.1
-            303 => 'See Other',
-            304 => 'Not Modified',
-            305 => 'Use Proxy',
-            // 306 is deprecated but reserved
-            307 => 'Temporary Redirect',
-            // Client Error 4xx
-            400 => 'Bad Request',
-            401 => 'Unauthorized',
-            402 => 'Payment Required',
-            403 => 'Forbidden',
-            404 => 'Not Found',
-            405 => 'Method Not Allowed',
-            406 => 'Not Acceptable',
-            407 => 'Proxy Authentication Required',
-            408 => 'Request Timeout',
-            409 => 'Conflict',
-            410 => 'Gone',
-            411 => 'Length Required',
-            412 => 'Precondition Failed',
-            413 => 'Request Entity Too Large',
-            414 => 'Request-URI Too Long',
-            415 => 'Unsupported Media Type',
-            416 => 'Requested Range Not Satisfiable',
-            417 => 'Expectation Failed',
-            // Server Error 5xx
-            500 => 'Internal Server Error',
-            501 => 'Not Implemented',
-            502 => 'Bad Gateway',
-            503 => 'Service Unavailable',
-            504 => 'Gateway Timeout',
-            505 => 'HTTP Version Not Supported',
-            509 => 'Bandwidth Limit Exceeded'
-    );
-    if(isset($_status[$code])) {
-        header('HTTP/1.1 '.$code.' '.$_status[$code]);
-        // 确保FastCGI模式下正常
-        header('Status:'.$code.' '.$_status[$code]);
-    }
-    return true;
-}
-
-function workInfo() {
-    include_once 'auth.php';
-    include_once 'work_area.php';
-    //验证token
-    if(!isset($_COOKIE['token'])) {
-        sendResponse(NOT_LOGGED_IN);
-    }elseif(!verifyToken($_COOKIE['token'])) {
-        sendResponse(TOKEN_IS_INCORRECT);
-    }
-
-    $body = analyJson(file_get_contents("php://input"));
-    if(!$body) {
-        sendResponse(WRONG_JSON);
-    }
-
-    switch(true){
-        case is_post():
-            if(!isset($body['infos']) || !isset($body['authority'])) {
-                sendResponse(EMPTY_BODY_FIELD);
-            }
-
-            $ret = setWorkInfo($conn, $body['infos'], $body['authority']);
-            sendResponse(
-                OK,
-                NULL,
-                ($ret) ? '成功' : '失败'
-            );
+/**
+ * route    /api/user/info
+ * method   GET/PUT/POST
+ */
+function userInfoEntry() {
+    switch(true) {
+        case isPut():
+            createUser();
             break;
-        case is_get():
-            if(!isset($body['vid']) || !isset($body['authority'])) {
-                sendResponse(EMPTY_BODY_FIELD);
-            }
-
-            $ret = getWorkInfo($conn, $body['vid'], $body['authority']);
-            sendResponse(
-                OK,
-                $ret,
-                ($ret) ? '成功' : '失败'
-            );
+        case isGet():
+            fetchUserInfo();
+            break;
+        case isPost():
+            changeUserInfo();
             break;
         default:
-            sendResponse(INVALID_REQUEST);
+            sendHttpStatus(403);
+            sendHttpStatus(FUNC_DENIED);
+    }
+}
+
+/**
+ * route    /api/user/login
+ * method   GET
+ */
+function userLoginEntry(){
+    switch(true) {
+        case isGet():
+            login();
+            break;
+        default:
+            sendHttpStatus(403);
+            sendResponse(FUNC_DENIED);
+    }
+}
+
+/**
+ * route    /api/users/pwd
+ * method   POST
+ */
+function userPwdEntry() {
+    switch(true) {
+        case isPost():
+            changePassword();
+            break;
+        default:
+            sendHttpStatus(403);
+            sendHttpStatus(FUNC_DENIED);
+    }
+}
+
+/**
+ * route    /api/user/name
+ * method   POST
+ */
+function userNameEntry() {
+    switch(true) {
+        case isPost():
+            changeUserName();
+            break;
+        default:
+            sendHttpStatus(403);
+            sendHttpStatus(FUNC_DENIED);
+    }
+}
+
+/**
+ * route    /api/user/jobs
+ * method   POST
+ */
+function userJobsEntry() {
+    switch(true) {
+        case isPost():
+            changeUserJobs();
+            break;
+        default:
+            sendHttpStatus(403);
+            sendHttpStatus(FUNC_DENIED);
+    }
+}
+
+/**
+ * route    /api/video/info
+ * method   GET/PUT
+ */
+function videoInfoEntry() {
+    switch(true) {
+        case isPut():
+            createVideo();
+            break;
+        case isGet():
+            getVideo();
+            break;
+        case isPost():
+            changeVideo();
+            break;
+        default:
+            sendHttpStatus(403);
+            sendHttpStatus(FUNC_DENIED);
+    }
+}
+
+/**
+ * route    /api/video
+ * method   GET/PUT
+ */
+function videoEntry() {
+    switch(true) {
+        default:
+            sendHttpStatus(403);
+            sendHttpStatus(FUNC_DENIED);
+    }
+}
+
+/**
+ * route    /api/task/info
+ * method   GET/PUT
+ */
+function taskInfoEntry() {
+    switch(true) {
+        case isPut():
+            createUser();
+            break;
+        case isGet():
+            fetchUserInfo();
+            break;
+        case isPost():
+            changeUserInfo();
+            break;
+        default:
+            sendHttpStatus(403);
+            sendHttpStatus(FUNC_DENIED);
+    }
+}
+
+/**
+ * route    /api/task
+ * method   GET/PUT
+ */
+function taskEntry() {
+    switch(true) {
+        default:
+            sendHttpStatus(403);
+            sendHttpStatus(FUNC_DENIED);
     }
 }
