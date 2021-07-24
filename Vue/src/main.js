@@ -46,6 +46,17 @@ Object.keys(filters).forEach(key => {
 
 Vue.config.productionTip = false
 
+Vue.prototype.$throttle = function (func, timeFrame) {
+  let lastTime = 0;
+  return function () {
+    const now = new Date();
+    if (now - lastTime >= timeFrame) {
+      func();
+      lastTime = now;
+    }
+  };
+}
+
 new Vue({
   el: '#app',
   router,

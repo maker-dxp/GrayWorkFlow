@@ -1,26 +1,31 @@
 <template>
   <div class="drawer-container">
     <div>
-      <h3 class="drawer-title">Page style setting</h3>
+      <h3 class="drawer-title">页面风格设置</h3>
 
       <div class="drawer-item">
-        <span>Theme Color</span>
+        <span>颜色</span>
         <theme-picker style="float: right;height: 26px;margin: -3px 8px 0 0;" @change="themeChange" />
       </div>
 
       <div class="drawer-item">
-        <span>Open Tags-View</span>
+        <span>快捷导航</span>
         <el-switch v-model="tagsView" class="drawer-switch" />
       </div>
 
       <div class="drawer-item">
-        <span>Fixed Header</span>
+        <span>固定导航头部</span>
         <el-switch v-model="fixedHeader" class="drawer-switch" />
       </div>
 
       <div class="drawer-item">
-        <span>Sidebar Logo</span>
+        <span>侧边菜单LOGO</span>
         <el-switch v-model="sidebarLogo" class="drawer-switch" />
+      </div>
+
+      <div class="drawer-item">
+        <span>网抑云音乐播放器</span>
+        <el-switch v-model="cloudMusic" class="drawer-switch" />
       </div>
 
     </div>
@@ -65,6 +70,17 @@ export default {
       set(val) {
         this.$store.dispatch('settings/changeSetting', {
           key: 'sidebarLogo',
+          value: val
+        })
+      }
+    },
+    cloudMusic:{
+      get(){
+        return this.$store.state.settings.cloudMusic
+      },
+      set(val) {
+        this.$store.dispatch('settings/changeSetting', {
+          key: 'cloudMusic',
           value: val
         })
       }

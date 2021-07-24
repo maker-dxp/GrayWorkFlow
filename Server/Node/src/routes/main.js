@@ -1,9 +1,7 @@
 const KoaRouter = require('@koa/router') //导入Koa-Router 库
 const { FileTree }= require('../unity/FileTree')  // 导入文件树库
 const path = require('path')
-
 const Origin_Router = new KoaRouter() // 实例化初始 Router
-
 const Files = new FileTree(path.resolve(__dirname,'./')) // 实例化文件树
 
 Files.getDirTree() // 获取文件树
