@@ -11,4 +11,7 @@ const WWWROOT       =       '';
 
 const APIROOT       =       '';
 //api目录相对路径,默认为api,可填入:api/不填
+
+ini_set('date.timezone', 'Asia/Shanghai');
+//时区设置,如有异常请注释掉
 ?>
