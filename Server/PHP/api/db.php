@@ -1,10 +1,6 @@
 <?php
 
-const SERVER        =       'localhost';
-const DB_USER       =       '';
-const DB_PASSWD     =       '';
-const DB_NAME       =       '';
-const CHARSET       =       'utf8mb4';
+require_once 'config.php';
 
 class DB {
     /** @var PDO */
