@@ -96,6 +96,6 @@ function exceptionHandle($exception) {
 
 /** 设置异常和错误处理 */
 set_exception_handler('exceptionHandle');
-set_error_handler('exceptionHandle');
+set_error_handler('exceptionHandle',E_USER_ERROR);
 
 route();
