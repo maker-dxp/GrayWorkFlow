@@ -1,66 +1,73 @@
 <?php
-require_once 'function.php';
 
-$servername = "localhost";
-$dbusername = "GrayWorkFlow";
-$dbpassword = "GrayWorkFlow";
-$dbname = "GrayWorkFlow";
+const SERVER        =       'localhost';
+const DB_USER       =       '';
+const DB_PASSWD     =       '';
+const DB_NAME       =       '';
+const CHARSET       =       'utf8mb4';
 
-$conn = new mysqli($servername, $dbusername, $dbpassword, $dbname);
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error() . PHP_EOL);
-}
-$conn->query("set names utf8");
+class DB {
+    /** @var PDO */
+    private $_db;
 
-function ifUserExist(mysqli $conn, string $user_name){
-    /** @var mysqli_stmt $user_if_exist */
-    $user_if_exist = $conn->prepare("SELECT `user_name` FROM `user` where `user_name` = ?");
-    $user_if_exist->bind_param("s",$user_name);
-    $user_if_exist->execute();
+    /** @var PDOStatement */
+    private $_statement;
 
-    /** @var mysqli_result $result */
-    $result = $user_if_exist->get_result();
+    private static $_instance = NULL;
 
-    if($result->num_rows){
-        return TRUE;
+    private function __construct() {
+        $this->_db = $this->dbConnect();
     }
-    return FALSE;
-}
 
-function addUser(mysqli $conn, string $user_name, string $user_password, string $user_qq){
-    if (ifUserExist($conn, $user_name)) {
-        return FALSE;
+    public static function get(): DB {
+        return self::$_instance ?? (self::$_instance = new DB());
     }
-    /** @var mysqli_stmt $insert_user */
-    $insert_user = $conn->prepare("INSERT INTO `user`(`user_id`, `user_name`, `user_password`, `user_qq`) SELECT (IFNULL(max(user_id), 0) + 1), ?, ?, ? FROM `user`;");
-    $insert_user->bind_param("sss", $user_name, $user_password, $user_qq);
-    $insert_user->execute();
-    $id = $conn->query("SELECT max(user_id) FROM `user`")->fetch_assoc()['max(user_id)'];
-    $conn->close();
-    return $id;
-}
 
-function getUserInfo(mysqli $conn, int $user_id){
-    /** @var mysqli_stmt $get_user_info */
-    $get_user_info = $conn->prepare("SELECT * FROM `user` where `user_id` = ?;");
-    $get_user_info->bind_param("i",$user_id);
-    $get_user_info->execute();
-    /** @var mysqli_result $result */
-    $result = $get_user_info->get_result();
-    if(!$result) { return false; }
-    return true;
-}
+    private function dbConnect():PDO {
+        $SERVER = SERVER;
+        $DB_NAME = DB_NAME;
+        $DB_PASSWD = DB_PASSWD;
+        $DB_USER = DB_USER;
+        $CHARSET = CHARSET;
 
-function verifyPassword(mysqli $conn, string $user_name, string $user_password){
-    /** @var mysqli_stmt $verify_password */
-    $verify_password = $conn->prepare("SELECT `user_id` FROM `user` WHERE `user_name` = ? AND `user_password` = ?;");
-    $verify_password->bind_param('ss', $user_name,$user_password);
-    $verify_password->execute();
-    /** @var mysqli_result $result */
-    $result = $verify_password->get_result();
-    if(!$result->num_rows){
-        return FALSE;
+        $pdo = new PDO("mysql:dbname={$DB_NAME};host={$SERVER};port=3306", $DB_USER, $DB_PASSWD);
+        $pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+        $pdo->exec("SET NAMES '{$CHARSET}'");
+        return $pdo;
     }
-    $user_id = $result->fetch_assoc()['user_id'];
-    return [TRUE,$user_id];
+
+    public function prepare(string $sql): DB {
+        $this->_statement = $this->_db->prepare($sql);
+        return $this;
+    }
+
+    public function execute(array $args = NULL){
+        if ($args === NULL) {
+            $ret = $this->_statement->execute();
+        } else {
+            $ret = $this->_statement->execute($args);
+        }
+
+        if($ret) {
+            return $this;
+        }else {
+            return false;
+        }
+    }
+
+    public function fetchAll($mode = PDO::FETCH_BOTH) {
+        return $this->_statement->fetchAll($mode);
+    }
+
+    public function fetch($mode = PDO::FETCH_BOTH, $cursorOrientation = PDO::FETCH_ORI_NEXT, $cursorOffset = 0) {
+        return $this->_statement->fetch($mode, $cursorOrientation, $cursorOffset);
+    }
+
+    public function fetchObject($class = "stdClass", array $ctorArgs = array()) {
+        return $this->_statement->fetchObject($class, $ctorArgs);
+    }
+
+    public function fetchColumn($column = 0) {
+        return $this->_statement->fetchColumn($column);
+    }
 }

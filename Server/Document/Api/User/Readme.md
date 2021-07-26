@@ -4,7 +4,7 @@
 
 Method : POST
 
-URL :  /User/login
+URL :  /api/user/login
 
 Request:
 
@@ -17,8 +17,8 @@ Request:
 Params:
 
     {
-        UserName:'',
-        Password:'',
+        "UserName": "",
+        "Password": ""
     }
 ----------------------------------------
 Response:
@@ -27,18 +27,18 @@ Response:
 > 
 >|  Key   | Value  |
 >|  ----  | ----  |
->| Access-Token: | {jwt-token} |
+>| Access-Token: | [jwt-token] |
 
 Body:
 
     {
         code:200,
-        message:'登录成功！',
+        message:'成功',
         data:{
             UserName:'FeiBam',
             Icon:'http://static.GrayWindTech.com/',
             Point:10,
-            Permission:['admin'],
+            Jobs:['admin'],
             lastLoginAt:'2021-01-01',
         }
     }
@@ -49,7 +49,7 @@ Body:
 
 Method : GET
 
-URL : /User/MyInfo
+URL : /api/user/info
 
 Request:
 
@@ -57,9 +57,15 @@ Request:
 > 
 >| key | value |
 >| ---- | ---- |
->| Access-Token: | {jwt-token} |
+>| Access-Token: | [jwt-token] |
 
-Params: None
+Body:
+
+```
+{
+    "uid": 3
+}
+```
 
 - - -
 
@@ -73,13 +79,74 @@ Response:
 
 Body:
 
+```
     {
-        code:200,
-        message:'ok',
-        data:{
-            UserName:'FeiBam'
+        "code": 200,
+        "message": "成功",
+        "data": {
+            "UserName": "test",
+            "DisplayName": "test2",
+            "Icon": "default.png",
+            "Point": "0",
+            "Permission": null,
+            "LastLoginAt": "2021-07-23 23:11:16"
         }
     }
+```
+
+- - -
+
+## 创建用户
+
+Method : PUT
+
+URL : /api/user/info
+
+Request:
+
+>Header:
+>
+>| key | value |
+>| ---- | ---- |
+>| Access-Token: | [jwt-token] |
+
+Body:
+
+```
+{
+    "UserName": "GrayWind",     //必须
+    "Password": "GrayWind",     //必须
+    "DisplayName": "GrayWind",
+    "Icon": "/path/icon/xxx.png"
+}
+```
+
+- - -
+
+Response:
+
+> Header:
+>
+> | key | value |
+> | ---- | ---- |
+> |  none | none |
+
+Body:
+
+```
+    {
+        "code": 200,
+        "message": "成功",
+        "data": {
+            "UserName": "test",
+            "DisplayName": "test2",
+            "Icon": "default.png",
+            "Point": "0",
+            "Permission": null,
+            "LastLoginAt": "2021-07-23 23:11:16"
+        }
+    }
+```
 
 - - -
 
@@ -87,7 +154,7 @@ Body:
 
 Method : POST
 
-URL : /User/Account/ChangePWD
+URL : /api/user/pwd
 
 Request:
 
@@ -95,12 +162,53 @@ Request:
 > 
 > | key | value |
 > | ---- | ---- |
-> |  Access-Token | {jwt-token} |
+> |  Access-Token | [jwt-token] |
 
-Params:
+Body:
 
+```
     {
-        OriginPWD:'' //老密码,
-        NewPWD:''  // 新密码
+        "uid": 0        //只有管理员可以设置其他人的密码
+        "OriginPWD":""    //老密码
+        "NewPWD":""       //新密码       如果不存在新密码则会随机设置一个密码
     }
+```
 
+Response:
+
+```
+    {
+        "OriginPWD":""    //老密码
+        "NewPWD":""       //新密码       
+    }
+```
+
+- - -
+
+## 修改昵称
+
+Method : POST
+
+URL : /api/user/name
+
+Request:
+
+> Header:
+>
+> | key | value |
+> | ---- | ---- |
+> |  Access-Token | [jwt-token] |
+
+Body:
+
+```
+    {
+        "DisplayName": "名字"
+    }
+    
+    //如果是管理员，则可以修改其他人的名称
+    {
+        "uid": 1,       //要修改的用户
+        "DisplayName": "名字"
+    }
+```
