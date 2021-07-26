@@ -61,7 +61,9 @@ function getRequestUri(): string {
             $requestUri .= '?' . $_SERVER['QUERY_STRING'];
         }
     }
-    $requestUri = substr($requestUri,strlen(WWWROOT)+1);
+    if(!empty(WWWROOT)){
+        $requestUri = substr($requestUri,strlen(WWWROOT)+1);
+    }
     return $requestUri;
 }
 
