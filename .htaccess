@@ -1,0 +1,6 @@
+RewriteEngine On
+
+RewriteCond %{HTTP:Access-Token} ^(.+)$
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Access-Token}]
+
+RewriteRule ^api/(.*)$ Server/PHP/api/index.php?$1
