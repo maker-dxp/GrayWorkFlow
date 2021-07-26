@@ -64,6 +64,9 @@ function getRequestUri(): string {
     if(!empty(WWWROOT)){
         $requestUri = substr($requestUri,strlen(WWWROOT)+1);
     }
+    if(empty(APIROOT)){
+        $requestUri = '/api'.$requestUri;
+    }
     return $requestUri;
 }
 
