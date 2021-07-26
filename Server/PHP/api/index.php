@@ -4,6 +4,8 @@
  * 程序入口
  */
 
+require_once 'config.php';
+
 //路由表常量 - 暂时不用 保留
 const FILE  =   0;
 const FUNC  =   1;
@@ -14,6 +16,7 @@ const FUNC  =   1;
  *  [路由] => [函数]
  */
 const ROUTE_MAP = array(
+    '/api/'                  =>      'helloWorld',
     '/api/user/login'       =>      'userLoginEntry',
     '/api/user/info'        =>      'userInfoEntry',
     '/api/user/pwd'         =>      'userPwdEntry',
@@ -58,7 +61,7 @@ function getRequestUri(): string {
             $requestUri .= '?' . $_SERVER['QUERY_STRING'];
         }
     }
-
+    $requestUri = substr($requestUri,strlen(WWWROOT)+1);
     return $requestUri;
 }
 
@@ -73,7 +76,7 @@ function route() {
 
     if (!isset(ROUTE_MAP[$path])) {
         sendHttpStatus(400);
-        sendResponse(FUNC_DENIED);
+        sendResponse(INVALID_REQUEST);
     }
 
     call_user_func(ROUTE_MAP[$path]);
