@@ -237,14 +237,14 @@ function createUser(){
             `create_time`
         )
         SELECT 
-               IFNULL(MAX(`uid`), 0) + 1,
-               :user_name,
-               :user_password,
-               :display_name,
-               :avatar,
-               :permission,
-               0,
-               :ctime
+                IFNULL(MAX(`uid`), 0) + 1,
+                :user_name,
+                :user_password,
+                :display_name,
+                :avatar,
+                :permission,
+                0,
+                :ctime
         FROM `users`;")
         ->execute(array(
             'user_name' => $user_name,
