@@ -9,6 +9,16 @@ include_once 'user.php';
 include_once 'request.php';
 
 /**
+ * route    /api
+ * method   GET/PUT/POST
+ */
+function helloWorld() {
+    sendHttpStatus(200);
+    sendResponse(OK);
+}
+
+
+/**
  * route    /api/user/info
  * method   GET/PUT/POST
  */
