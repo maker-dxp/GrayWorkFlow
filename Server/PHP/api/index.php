@@ -8,6 +8,8 @@
 const FILE  =   0;
 const FUNC  =   1;
 
+const PREFIX = '/GrayWind';
+
 //路由表 - 所有的函数都位于function.php
 /*
  * 路由表写法：
@@ -62,7 +64,7 @@ function getRequestUri(): string {
     return $requestUri;
 }
 
-function route() {
+function route(string $prefix) {
     include_once 'function.php';
     $fullPath = getRequestUri();
     if ($pos = strpos($fullPath, '?')) {
@@ -70,6 +72,8 @@ function route() {
     } else {
         $path = $fullPath;
     }
+
+    $path = str_replace(PREFIX, '', $path);
 
     if (!isset(ROUTE_MAP[$path])) {
         sendHttpStatus(400);
@@ -90,4 +94,4 @@ function exceptionHandle($exception) {
 set_exception_handler('exceptionHandle');
 set_error_handler('exceptionHandle');
 
-route();
+route(PREFIX);
