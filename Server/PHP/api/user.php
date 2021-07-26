@@ -154,10 +154,10 @@ function login() {
             'Icon' => $info['avatar'],
             'Point' => $info['point'],
             'Jobs' => (unserialize($info['jobs']) === false) ? NULL : unserialize($info['jobs']),
-            'lastLoginAt' => $info['last_time']
+            'Access-Token' => $token,
+            'lastLoginAt' => $info['last_time'],
         );
 
-        header("Access-Token: {$token}");
         sendResponse(OK, $data);
     } else {
         sendHttpStatus(400);
