@@ -30,6 +30,13 @@ const JOB_TABLE = array(
     'video_maker'
 );
 
+const FIELD_USER = array(
+    'display_name' => 'DisplayName',
+    'avatar' => 'Icon',
+    'jobs' => 'Permission',
+    'point' => 'Point'
+);
+
 function createToken($username, $userid, $usergroup='Undefined'): string {
     $key = '344'; //key，唯一标识
     $time = time(); //当前时间
@@ -320,6 +327,7 @@ function fetchUserInfo() {
     }
 
     $data = array(
+        'uid' => $info['uid'],
         'UserName' => $info['user_name'],
         'DisplayName' => $info['display_name'],
         'Icon' => $info['avatar'],
@@ -340,7 +348,132 @@ function checkJobs(array $jobs): bool {
 }
 
 function changeUserInfo() {
-    sendResponse(FUNC_DENIED);
+    // sendResponse(FUNC_DENIED);
+
+    if(!(isLogin())) {
+        sendHttpStatus(403);
+        sendResponse(NOT_LOGGED_IN);
+    }
+    $token = verifyToken(getToken());
+
+    if(!($raw = getRawData())) {
+        sendHttpStatus(400);
+        sendResponse(EMPTY_BODY);
+    }
+
+    if(!($req = parseRawJson($raw))) {
+        sendHttpStatus(400);
+        sendResponse(WRONG_JSON);
+    }
+
+    $uid = $token->uid;
+    $infos = $req['UserInfos'];
+    if(empty($infos)){
+        sendHttpStatus(400);
+        sendResponse(EMPTY_BODY);
+    }
+
+    $auth = unserialize(DB::get()
+        ->prepare("SELECT `jobs` FROM `users` WHERE `uid` = :uid;")
+        ->execute(array(
+            'uid' => $uid
+        ))->fetch()[0]);
+
+    if(array_search('admin', $auth) === false &&
+        array_search('su', $auth) === false
+    ){
+        $uid = $token->uid;
+    }else {
+        $uid = $req['uid'] ?? $token->uid;
+    }
+
+    $ori_info = getUserInfo($uid);
+    foreach ($ori_info as $key => $value) {
+        if(!isset($infos[FIELD_USER[$key]])) {
+            continue;
+        }
+        //更新数据
+        $ori_info[$key] = $infos[FIELD_USER[$key]];
+        $data['New ' . FIELD_USER[$key]] = $infos[FIELD_USER[$key]];
+    }
+
+    $ret = DB::get()
+        ->prepare('
+            UPDATE `users`
+            SET
+                `display_name` = :display_name,
+                `avatar` = :avatar,
+                `jobs` = :jobs,
+                `point` = :point
+            WHERE `uid` = :uid;')
+        ->execute(array(
+            'display_name' => $ori_info['display_name'],
+            'avatar' => $ori_info['avatar'],
+            'jobs' => $ori_info['jobs'],
+            'point' => $ori_info['point'],
+            'uid' => $uid
+        ));
+
+    if($ret === false) {
+        sendHttpStatus(500);
+        sendResponse(SERVER_ERROR);
+    }
+
+    sendResponse(OK, $data);
+}
+
+function changeUserAvatar() {
+    if(!(isLogin())) {
+        sendHttpStatus(403);
+        sendResponse(NOT_LOGGED_IN);
+    }
+    $token = verifyToken(getToken());
+
+    if(!($raw = getRawData())) {
+        sendHttpStatus(400);
+        sendResponse(EMPTY_BODY);
+    }
+
+    if(!($req = parseRawJson($raw))) {
+        sendHttpStatus(400);
+        sendResponse(WRONG_JSON);
+    }
+
+    $uid = $token->uid;
+    $avatar = $req['avatar'] ?? AVATAR;
+
+    $auth = unserialize(DB::get()
+        ->prepare("SELECT `jobs` FROM `users` WHERE `uid` = :uid;")
+        ->execute(array(
+            'uid' => $uid
+        ))->fetch()[0]);
+
+    if(array_search('admin', $auth) === false &&
+        array_search('su', $auth) === false
+    ){
+        // 只能修改自己的头像
+        $uid = $token['uid'];
+    }else {
+        // 管理员可以修改其他人的头像
+        $uid = (isset($req['uid'])) ? $req['uid'] : $token['uid'];
+    }
+
+    $ret = DB::get()
+    ->prepare("UPDATE `users` SET `avatar` = :avatar WHERE `uid` = :uid;")
+    ->execute(array(
+        'password' => $avatar,
+        'uid' => $uid
+    ));
+
+    if($ret === false){
+        sendHttpStatus(500);
+        sendResponse(OPERATION_FAIL);
+    }
+
+    $data = array(
+        'NewIcon' => $avatar
+    );
+    sendResponse(OK, $data);
 }
 
 function changePassword() {

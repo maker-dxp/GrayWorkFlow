@@ -95,6 +95,8 @@ function sendResponse(int $code, array $data = NULL, string $message = NULL) {
         'data' => $data
     );
 
+    header('Access-Control-Allow-Origin:*');
+    header('Access-Control-Allow-Methods:POST,GET,PUT');
     header('Content-type: application/json');
     echo json_encode($ret, JSON_UNESCAPED_UNICODE);
     exit();

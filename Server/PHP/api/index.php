@@ -16,12 +16,13 @@ const FUNC  =   1;
  *  [路由] => [函数]
  */
 const ROUTE_MAP = array(
-    '/api/'                  =>      'helloWorld',
+    '/api'                  =>      'helloWorld',
     '/api/user/login'       =>      'userLoginEntry',
     '/api/user/info'        =>      'userInfoEntry',
     '/api/user/pwd'         =>      'userPwdEntry',
     '/api/user/name'        =>      'userNameEntry',
     '/api/user/jobs'        =>      'userJobsEntry',
+    '/api/user/avatar'      =>      'userAvatarEntry',
     '/api/video/info'       =>      'videoInfoEntry',
     '/api/video'            =>      'videoEntry',
     '/api/task/info'        =>      'taskInfoEntry',
@@ -61,9 +62,7 @@ function getRequestUri(): string {
             $requestUri .= '?' . $_SERVER['QUERY_STRING'];
         }
     }
-    if(!empty(WWWROOT)){
-        $requestUri = substr($requestUri,strlen(WWWROOT)+1);
-    }
+
     return $requestUri;
 }
 
@@ -75,9 +74,14 @@ function route() {
     } else {
         $path = $fullPath;
     }
+
+    if(!empty(WWWROOT)){
+        $path = substr($path, WWWROOT_LENGTH + 1);
+    }
     if(empty(APIROOT)){
         $path = '/api'.$path;
     }
+
     if (!isset(ROUTE_MAP[$path])) {
         sendHttpStatus(400);
         sendResponse(INVALID_REQUEST);
@@ -94,7 +98,11 @@ function exceptionHandle($exception) {
 }
 
 /** 设置异常和错误处理 */
-set_exception_handler('exceptionHandle');
-set_error_handler('exceptionHandle',E_USER_ERROR);
+if(DEBUG){
+    
+}else {
+    set_exception_handler('exceptionHandle');
+    set_error_handler('exceptionHandle',E_USER_ERROR);
+}
 
 route();
