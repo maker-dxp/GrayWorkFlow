@@ -64,9 +64,6 @@ function getRequestUri(): string {
     if(!empty(WWWROOT)){
         $requestUri = substr($requestUri,strlen(WWWROOT)+1);
     }
-    if(empty(APIROOT)){
-        $requestUri = '/api'.$requestUri;
-    }
     return $requestUri;
 }
 
@@ -78,7 +75,9 @@ function route() {
     } else {
         $path = $fullPath;
     }
-
+    if(empty(APIROOT)){
+        $path = '/api'.$path;
+    }
     if (!isset(ROUTE_MAP[$path])) {
         sendHttpStatus(400);
         sendResponse(INVALID_REQUEST);
