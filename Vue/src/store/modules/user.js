@@ -7,6 +7,7 @@ const state = {
   name: '',
   avatar: '',
   introduction: '',
+  point:0,
   roles: []
 }
 
@@ -17,23 +18,27 @@ const mutations = {
   SET_INTRODUCTION: (state, introduction) => {
     state.introduction = introduction
   },
-  SET_NAME: (state, name) => {
-    state.name = name
+  SET_NAME: (state, UserName) => {
+    state.name = UserName
   },
-  SET_AVATAR: (state, avatar) => {
-    state.avatar = avatar
+  SET_AVATAR: (state, Icon) => {
+    state.avatar = Icon
   },
-  SET_ROLES: (state, roles) => {
-    state.roles = roles
+  SET_ROLES: (state, Permission) => {
+    console.log(Permission,1)
+    state.roles = Permission
+  },
+  SET_POINT: (state, point) => {
+    state.point = point
   }
 }
 
 const actions = {
   // user login
   login({ commit }, userInfo) {
-    const { username, password } = userInfo
+    const { UserName, PassWord } = userInfo
     return new Promise((resolve, reject) => {
-      login({ username: username.trim(), password: password }).then(response => {
+      login({ UserName: UserName.trim(), PassWord: PassWord, }).then(response => {
         const { data } = response
         commit('SET_TOKEN', data.token)
         setToken(data.token)
@@ -54,17 +59,18 @@ const actions = {
           reject('Verification failed, please Login again.')
         }
 
-        const { roles, name, avatar, introduction } = data
+        const { Permission, UserName, Icon, Point } = data
+        console.log(data)
 
         // roles must be a non-empty array
-        if (!roles || roles.length <= 0) {
+        if (!Permission || Permission.length <= 0) {
           reject('getInfo: roles must be a non-null array!')
         }
 
-        commit('SET_ROLES', roles)
-        commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
-        commit('SET_INTRODUCTION', introduction)
+        commit('SET_ROLES', Permission)
+        commit('SET_NAME', UserName)
+        commit('SET_AVATAR', Icon)
+        commit('SET_POINT', Point)
         resolve(data)
       }).catch(error => {
         reject(error)

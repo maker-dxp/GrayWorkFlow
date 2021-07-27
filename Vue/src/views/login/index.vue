@@ -25,18 +25,19 @@
             :model="loginForm"
             :rules="loginRules"
           >
-            <el-form-item>
-              <el-input placeholder="账户名"></el-input>
+            <el-form-item prop="UserName">
+              <el-input type="text" v-model="loginForm.UserName" placeholder="账户名"/>
             </el-form-item>
-            <el-form-item>
-              <el-input placeholder="密码"></el-input>
+            <el-form-item prop="PassWord">
+              <el-input v-model="loginForm.PassWord" type="password" placeholder="密码"/>
             </el-form-item>
             <el-form-item>
               <div style="display: flex;justify-content: space-between">
                 <el-checkbox
                   label="30天内记住密码"
                   name="type"
-                ></el-checkbox>
+                  v-model="loginForm.RememberPassWord"
+                />
                 <a
                   @click="$notify({
                       title: '丢失密码？',
@@ -67,28 +68,22 @@ export default {
   name: 'Login',
   components: { SocialSign },
   data() {
-    const validateUsername = (rule, value, callback) => {
-      if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
-      } else {
-        callback()
-      }
-    }
     const validatePassword = (rule, value, callback) => {
       if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+        callback(new Error('请输入密码！'))
       } else {
         callback()
       }
     }
     return {
       loginForm: {
-        username: 'admin',
-        password: '111111'
+        UserName:'',
+        PassWord:'',
+        RememberPassWord:false
       },
       loginRules: {
-        username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-        password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+        UserName: [{ required: true, trigger: 'blur' , message:'请输入用户名!'}],
+        PassWord: [{ required: true, trigger: 'blur', validator: validatePassword }]
       },
       passwordType: 'password',
       capsTooltip: false,
@@ -142,6 +137,7 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
+          console.log(valid)
           this.$store.dispatch('user/login', this.loginForm)
             .then(() => {
               this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
