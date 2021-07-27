@@ -257,11 +257,11 @@ function updateJob(array $jobInfo) {
 
     $infos = getJobInfo($jid);
     foreach ($infos as $key => $value) {
-        if(!isset($jobInfo[FIELD_JOB[$key]])) {
+        if(!isset($jobInfo[FIELD_TASK[$key]])) {
             continue;
         }
         //更新数据
-        $infos[$key] = $jobInfo[FIELD_JOB[$key]];
+        $infos[$key] = $jobInfo[FIELD_TASK[$key]];
     }
 
     return DB::get()

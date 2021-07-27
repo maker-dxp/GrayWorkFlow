@@ -99,7 +99,7 @@ function exceptionHandle($exception) {
 
 /** 设置异常和错误处理 */
 if(DEBUG){
-    
+    error_reporting(E_ALL);
 }else {
     set_exception_handler('exceptionHandle');
     set_error_handler('exceptionHandle',E_USER_ERROR);
