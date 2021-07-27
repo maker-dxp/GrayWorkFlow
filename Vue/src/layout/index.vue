@@ -12,14 +12,14 @@
         <settings />
       </right-panel>
     </div>
-    <CloudMusic></CloudMusic>
+    //<CloudMusic></CloudMusic>
   </div>
 </template>
 
 <script>
 import RightPanel from '@/components/RightPanel'
 import { AppMain, Navbar, Settings, Sidebar, TagsView} from './components'
-import CloudMusic from './components/CloudMusic/index'
+//import CloudMusic from './components/CloudMusic/index'
 import ResizeMixin from './mixin/ResizeHandler'
 import { mapState } from 'vuex'
 
@@ -32,7 +32,7 @@ export default {
     Settings,
     Sidebar,
     TagsView,
-    CloudMusic
+    //CloudMusic
   },
   mixins: [ResizeMixin],
   computed: {
