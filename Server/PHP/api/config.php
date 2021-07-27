@@ -17,8 +17,5 @@ define('APIROOT', strlen(APIROOT));
 ini_set('date.timezone', 'Asia/Shanghai');
 //时区设置,如有异常请注释掉
 
-const PREFIX = '/GrayWind';
-define('PREFIX_LENGTH', strlen(PREFIX));
-
 const DEBUG = true;
 ?>
