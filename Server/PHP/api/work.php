@@ -278,7 +278,7 @@ function updateJob(array $jobInfo) {
                 `cover_status` = :cover_status,
                 `cover_user` = :cover_user,
                 `cover_proof_user` = :cover_proof_user
-            WHERE `tid` = :jid;
+            WHERE `tid` = :tid;
         ")->execute(array(
             'video_upload_user' => $infos['video_upload_user'],
             'translate_status' => $infos['translate_status'],

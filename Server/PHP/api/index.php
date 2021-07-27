@@ -4,11 +4,11 @@
  * 程序入口
  */
 
+require_once 'config.php';
+
 //路由表常量 - 暂时不用 保留
 const FILE  =   0;
 const FUNC  =   1;
-
-const PREFIX = '/GrayWind';
 
 //路由表 - 所有的函数都位于function.php
 /*
@@ -16,11 +16,13 @@ const PREFIX = '/GrayWind';
  *  [路由] => [函数]
  */
 const ROUTE_MAP = array(
+    '/api/'                  =>      'helloWorld',
     '/api/user/login'       =>      'userLoginEntry',
     '/api/user/info'        =>      'userInfoEntry',
     '/api/user/pwd'         =>      'userPwdEntry',
     '/api/user/name'        =>      'userNameEntry',
     '/api/user/jobs'        =>      'userJobsEntry',
+    '/api/user/avatar'      =>      'userAvatarEntry',
     '/api/video/info'       =>      'videoInfoEntry',
     '/api/video'            =>      'videoEntry',
     '/api/task/info'        =>      'taskInfoEntry',
@@ -64,7 +66,7 @@ function getRequestUri(): string {
     return $requestUri;
 }
 
-function route(string $prefix) {
+function route() {
     include_once 'function.php';
     $fullPath = getRequestUri();
     if ($pos = strpos($fullPath, '?')) {
@@ -73,11 +75,16 @@ function route(string $prefix) {
         $path = $fullPath;
     }
 
-    $path = str_replace(PREFIX, '', $path);
+    if(!empty(WWWROOT)){
+        $path = substr($path, WWWROOT_LENGTH + 1);
+    }
+    if(empty(APIROOT)){
+        $path = '/api'.$path;
+    }
 
     if (!isset(ROUTE_MAP[$path])) {
         sendHttpStatus(400);
-        sendResponse(FUNC_DENIED);
+        sendResponse(INVALID_REQUEST);
     }
 
     call_user_func(ROUTE_MAP[$path]);
@@ -91,7 +98,11 @@ function exceptionHandle($exception) {
 }
 
 /** 设置异常和错误处理 */
-set_exception_handler('exceptionHandle');
-set_error_handler('exceptionHandle');
+if(DEBUG){
+    
+}else {
+    set_exception_handler('exceptionHandle');
+    set_error_handler('exceptionHandle',E_USER_ERROR);
+}
 
-route(PREFIX);
+route();

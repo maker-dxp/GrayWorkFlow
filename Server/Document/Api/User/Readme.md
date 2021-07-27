@@ -34,13 +34,7 @@ Body:
     {
         code:200,
         message:'成功',
-        data:{
-            UserName:'FeiBam',
-            Icon:'http://static.GrayWindTech.com/',
-            Point:10,
-            Jobs:['admin'],
-            lastLoginAt:'2021-01-01',
-        }
+        data:{}
     }
 
 - - -
@@ -59,13 +53,8 @@ Request:
 >| ---- | ---- |
 >| Access-Token: | [jwt-token] |
 
-Body:
+Body:none
 
-```
-{
-    "uid": 3
-}
-```
 
 - - -
 
@@ -83,7 +72,7 @@ Body:
     {
         "code": 200,
         "message": "成功",
-        "data": {
+         "data": {
             "UserName": "test",
             "DisplayName": "test2",
             "Icon": "default.png",

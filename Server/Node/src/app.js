@@ -5,13 +5,18 @@ const KoaBody = require('koa-bodyparser')
 const { Router } = require('./routes/main')
 
 
-
 const App = new Koa()
 
+App.use(KoaBody())
+
+App.use(KoaCors({
+    origin:'*'
+}))
+
 App.use(async (ctx,next)=>{
-    console.log(ctx)
     await next()
 })
+
 App.use(Router.routes())
 
 App.listen(8080)

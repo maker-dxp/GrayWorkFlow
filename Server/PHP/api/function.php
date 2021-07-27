@@ -9,6 +9,16 @@ include_once 'user.php';
 include_once 'request.php';
 
 /**
+ * route    /api
+ * method   GET/PUT/POST
+ */
+function helloWorld() {
+    sendHttpStatus(200);
+    sendResponse(OK);
+}
+
+
+/**
  * route    /api/user/info
  * method   GET/PUT/POST
  */
@@ -90,10 +100,27 @@ function userJobsEntry() {
 }
 
 /**
+ * route    /api/user/avatar
+ * method   POST
+ */
+function userAvatarEntry() {
+    switch(true) {
+        case isPost():
+            changeUserAvatar();
+            break;
+        default:
+            sendHttpStatus(403);
+            sendHttpStatus(FUNC_DENIED);
+    }
+}
+
+/**
  * route    /api/video/info
  * method   GET/PUT
  */
 function videoInfoEntry() {
+    sendHttpStatus(FUNC_DENIED);
+
     switch(true) {
         case isPut():
             createVideo();
@@ -127,6 +154,8 @@ function videoEntry() {
  * method   GET/PUT
  */
 function taskInfoEntry() {
+    sendHttpStatus(FUNC_DENIED);
+
     switch(true) {
         case isPut():
             createUser();
