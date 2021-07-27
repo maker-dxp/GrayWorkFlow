@@ -16,7 +16,7 @@ const FUNC  =   1;
  *  [路由] => [函数]
  */
 const ROUTE_MAP = array(
-    '/api'                  =>      'helloWorld',
+    '/api/'                  =>      'helloWorld',
     '/api/user/login'       =>      'userLoginEntry',
     '/api/user/info'        =>      'userInfoEntry',
     '/api/user/pwd'         =>      'userPwdEntry',
