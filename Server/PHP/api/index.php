@@ -62,7 +62,7 @@ function getRequestUri(): string {
             $requestUri .= '?' . $_SERVER['QUERY_STRING'];
         }
     }
-    
+
     return $requestUri;
 }
 
