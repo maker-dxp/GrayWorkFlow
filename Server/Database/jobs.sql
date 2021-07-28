@@ -1,6 +1,6 @@
 # 工作表
 CREATE TABLE `tasks`(
-    `tid` INT,
+    `tid` INT AUTO_INCREMENT,
     `video` INT DEFAULT 0,
     `video_upload_user` INT DEFAULT 0,
     `translate_status` VARCHAR(32) DEFAULT "",

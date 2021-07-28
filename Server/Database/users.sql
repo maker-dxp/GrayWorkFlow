@@ -1,11 +1,11 @@
 # 用户表
 CREATE TABLE `users`(
-    `uid` INT,
+    `uid` INT AUTO_INCREMENT,
     `user_name` VARCHAR(64) DEFAULT "",
     `user_password` VARCHAR(128) DEFAULT "",
     `display_name` VARCHAR(64) DEFAULT "",
     `avatar` VARCHAR(256) DEFAULT "",
-    `jobs` VARCHAR(256) DEFAULT "",
+    `jobs` VARCHAR(1024) DEFAULT "",
     `point` INT DEFAULT 0,
     `create_time` DATE,
     `last_time` TIMESTAMP,

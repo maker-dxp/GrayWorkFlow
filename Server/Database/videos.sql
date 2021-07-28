@@ -1,6 +1,6 @@
 # 视频文件表
 CREATE TABLE `videos`(
-    `vid` INT,
+    `vid` INT AUTO_INCREMENT,
     `video_name` VARCHAR(256) NOT NULL,
     `video_describe` TEXT,
     `video_origin_file` VARCHAR(256) DEFAULT "",
