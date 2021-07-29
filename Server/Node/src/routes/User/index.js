@@ -30,7 +30,7 @@ Router.get('/info',async (ctx,next)=>{
             Icon:'https://lh3.googleusercontent.com/ogw/ADea4I4blpmXSoI9hYn_6E3d8V46UlF3qJbKOsoZ6IuZ=s83-c-mo',
             Point:10,
             Permission:['admin'],
-            lastLoginAt:'2021-01-01',
+            lastLoginAt:'2021-01-01 19:23',
         }
     }
 })
