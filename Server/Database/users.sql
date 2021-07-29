@@ -26,6 +26,9 @@ INSERT INTO `users`
           "2000-01-01"
     );
 
+UPDATE `users` SET `uid` = 0 WHERE `uid` = 1;
+#AUTO_INCREMENT会把uid变成1,故重新更新为0
+
 INSERT INTO `users`
 VALUE(
      1,
