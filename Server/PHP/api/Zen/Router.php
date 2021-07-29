@@ -128,6 +128,7 @@ class Zen_Router {
             if(is_dir($full_path) && $php_file !== '.' && $php_file !== '..') {
                 $path = $path . DIRECTORY_SEPARATOR . $php_file;
                 self::setAllWidget($path, (empty($prefix) ? 'Widget_' . $php_file . '_' : $prefix . $php_file . '_'));
+                $path = __ZEN_WIDGET_PATH__;
             }
             if(preg_match('/.*\.php$/i', $php_file)) {
                 self::$_widgets[] = ($prefix === '' ? 'Widget_' : $prefix) . substr($php_file, 0, strpos($php_file, '.php'));
@@ -194,7 +195,7 @@ class Zen_Router {
                             self::$_map[$path]['type'] = '';
                         }
                     }
-                    var_dump($ret);
+                    // var_dump($ret);
                 }
             }
             var_dump(self::$_map);
