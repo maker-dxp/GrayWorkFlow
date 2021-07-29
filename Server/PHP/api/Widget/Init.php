@@ -1,6 +1,5 @@
 <?php
 
-
 class Widget_Init extends Zen_Widget{
     /**
      * 全局初始化
@@ -16,13 +15,16 @@ class Widget_Init extends Zen_Widget{
          */
         switch(true) {
             case WIDGET_DEBUG:
-            case (!$options->keyEmpty('RouteTable')):
+            case ($options->keyEmpty('RouteTable') || $options->keyEmpty('RouteIgnore')):
+                Zen_Router::setRouteIgnore(PHP_IGNORE, true);
                 Zen_Router::setRouteTable();
                 $options->setOption('RouteTable', Zen_Router::getRouteTable());
+                $options->setOption('RouteIgnore', Zen_Router::getRouteIgnore());
                 break;
             default:
-                $data = $options->getOption('RouteTable');
-                Zen_Router::init($data);
+                $map = $options->getOption('RouteTable');
+                $ignore = $options->getOption('RouteIgnore');
+                Zen_Router::init($map, $ignore);
         }
     }
 }

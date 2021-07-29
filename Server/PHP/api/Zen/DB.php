@@ -1,12 +1,5 @@
 <?php
-///* 数据库权限 */
-//const               AUTH_READ       =   1;
-//const               AUTH_WRITE      =   2;
-//const               AUTH_CACHE      =   3;
-//const               AUTH_NOSQL      =   4;
-//const               AUTH_MAIN       =   5;
-
-/* 权限常量 */
+/* 数据库权限常量 */
 const               AUTH_READ       =   1;
 const               AUTH_WRITE      =   2;
 const               AUTH_CACHE      =   3;
@@ -153,11 +146,6 @@ class Zen_DB {
     private $_authority = self::AUTH_NULL;
 
     /**
-     * 禁止复制对象
-     */
-    private function __clone() { }
-
-    /**
      * Zen_DB constructor.
      * @param int $authority
      * @param string $prefix
@@ -204,6 +192,11 @@ class Zen_DB {
     public function __destruct() {
         $this->_adapter->close();
     }
+
+    /**
+     * 禁止复制对象
+     */
+    private function __clone() { }
 
     /**
      * Get a Zen_DB instance

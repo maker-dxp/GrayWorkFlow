@@ -6,22 +6,25 @@
  */
 
 /* 核心文件位置 */
-define('__ZEN_CORE_PATH__', dirname(__FILE__));
+const __ZEN_CORE_PATH__     =   __DIR__;
 
 /* 组件目录 */
-const __ZEN_WIDGET_PATH__ = __ZEN_CORE_PATH__ . DIRECTORY_SEPARATOR . 'Widget';
+const __ZEN_WIDGET_PATH__   =   __ZEN_CORE_PATH__ . DIRECTORY_SEPARATOR . 'Widget';
 
 /* 额外组件目录 */
-const __ZEN_EXTRA_PATH__ = __ZEN_CORE_PATH__ . DIRECTORY_SEPARATOR . 'Extra';
+const __ZEN_EXTRA_PATH__    =   __ZEN_CORE_PATH__ . DIRECTORY_SEPARATOR . 'Extra';
 
 /* 插件目录 */
-const __ZEN_PLUGIN_PATH__ = '';
+const __ZEN_PLUGIN_PATH__   =   __ZEN_CORE_PATH__ . DIRECTORY_SEPARATOR . 'Plugin';
 
 /* 文件上传目录 */
-const __UPLOAD_PATH__ = '';
+const __UPLOAD_PATH__       =   __ZEN_CORE_PATH__ . DIRECTORY_SEPARATOR . 'Upload';
 
 /* Page Path */
-const __PAGE_PATH__ = '';
+const __PAGE_PATH__         =   __ZEN_CORE_PATH__ . DIRECTORY_SEPARATOR . 'Page';
+
+/* Log Path */
+const __LOG_PATH__          =   __ZEN_CORE_PATH__ . DIRECTORY_SEPARATOR . 'Log';
 
 /* 设置include路径 */
 @set_include_path(
@@ -29,6 +32,8 @@ const __PAGE_PATH__ = '';
     __ZEN_CORE_PATH__ . PATH_SEPARATOR .
     __ZEN_EXTRA_PATH__
 );
+
+require_once 'Zen/Loader.php';
 
 /* 数据库配置
  *
@@ -44,8 +49,8 @@ const __ZEN_DATABASE__ = array(
         'database' => 'test',
         'host' => 'localhost',
         'port' => '3306',
-        'user' => 'test',
-        'password' => 'test',
+        'user' => 'tenko',
+        'password' => 'Ap009731',
         'charset' => 'utf8mb4',
         'authority' => Zen_DB::AUTH_MAIN
     ]
@@ -69,8 +74,8 @@ const __ZEN_ROUTER_ANNOTATION__ = true;
 /* 用于做http参数检查 */
 const __EXTRA_CHECK_STR__ = '';
 /* 第三方JSON支持 */
-const __EXTRA_JSON_ENCODE__ = '';
-const __EXTRA_JSON_DECODE__ = '';
+const __EXTRA_JSON_ENCODE__ = 'Json@encode';
+const __EXTRA_JSON_DECODE__ = 'Json@decode';
 /* 防止针对URL的XSS注入 */
 const __EXTRA_SAFETY_URL__ = '';
 /* 第三方UUID算法支持 */

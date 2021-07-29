@@ -41,14 +41,13 @@ class Zen_Loader {
      * 加载额外类
      *
      * @param string $class_name
-     * @throws Zen_Loader_Exception
      */
     public static function loadExtra(string $class_name) {
         if(empty(__ZEN_EXTRA_PATH__)) {
             throw new Zen_Loader_Exception("Error: Extra Path is not found.\n", HTTP_SERVER_ERROR);
         }
 
-        $file = __ZEN_EXTRA_PATH__ . DIRECTORY_SEPARATOR . self::$_class_map[$class_name];
+        $file = self::$_class_map[$class_name];
         @include_once $file;
     }
 

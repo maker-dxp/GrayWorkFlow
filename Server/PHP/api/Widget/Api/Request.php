@@ -2,42 +2,6 @@
 
 class Widget_Api_Request {
     /**
-     * 是否为GET
-     *
-     * @return bool
-     */
-    public static function isGet(): bool {
-        return $_SERVER['REQUEST_METHOD'] == 'GET';
-    }
-
-    /**
-     * 是否为POST
-     *
-     * @return bool
-     */
-    public static function isPost(): bool {
-        return $_SERVER['REQUEST_METHOD'] == 'POST';
-    }
-
-    /**
-     * 是否为PUT
-     *
-     * @return bool
-     */
-    public static function isPut(): bool {
-        return $_SERVER['REQUEST_METHOD'] == 'PUT';
-    }
-
-    /**
-     * 是否为DELETE
-     *
-     * @return bool
-     */
-    public static function isDelete(): bool {
-        return $_SERVER['REQUEST_METHOD'] == 'DELETE';
-    }
-
-    /**
      * 获取方法体
      *
      * @return false|string
@@ -64,5 +28,20 @@ class Widget_Api_Request {
         } else {
             return $ret;
         }
+    }
+
+    /**
+     * 获取token
+     *
+     * @return false|string
+     */
+    public static function getToken() {
+        $header = getallheaders();
+
+        if(!isset($header['Access-Token'])) {
+            return false;
+        }
+
+        return $header['Access-Token'];
     }
 }

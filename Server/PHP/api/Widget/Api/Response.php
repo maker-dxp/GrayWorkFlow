@@ -89,6 +89,11 @@ class Widget_Api_Response {
         exit();
     }
 
+    /**
+     * 发送http状态码
+     *
+     * @param int $code
+     */
     public static function sendHttpStatus(int $code) {
         Zen_Response::setStatus($code);
     }

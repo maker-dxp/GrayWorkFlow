@@ -10,6 +10,10 @@ const CLASS_MAP                         =       array(
   'SignatureInvalidException'           =>      'Firebase/JWT/SignatureInvalidException.php'
 );
 
+const PHP_IGNORE                        =       array(
+    'widget.config.php'
+);
+
 const DEFAULT_AVATAR                    =       '';
 
 /* 用户权限 */

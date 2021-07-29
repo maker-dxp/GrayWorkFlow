@@ -166,7 +166,7 @@ class Zen_Response {
      */
     public static function setStatus(int $code) {
         if (isset(self::$_http_code[$code])) {
-            header((isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1') . ' ' . $code . ' ' . self::$_http_code[$code], true, $code);
+            header(($_SERVER['SERVER_PROTOCOL'] ?? 'HTTP/1.1') . ' ' . $code . ' ' . self::$_http_code[$code], true, $code);
         }
     }
 

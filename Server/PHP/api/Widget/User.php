@@ -68,6 +68,13 @@ class Widget_User extends Zen_Widget{
     private $_data = array();
 
     /**
+     * 写入缓存
+     *
+     * @var array
+     */
+    private $_cache = array();
+
+    /**
      * Widget_User constructor.
      *
      * @param mixed $data   任意类型的用于用户验证的数据
@@ -96,7 +103,7 @@ class Widget_User extends Zen_Widget{
                 $user_name = $data['user_name'];
                 $user_passwd = $data['user_passwd'];
                 $sql->where('user_name = ?', $user_name)
-                    ->where('user_password = ?', $user_passwd)
+                    ->where('user_password = ?', $this->hashPassword($user_passwd))
                     ->limit(1);
                 break;
             default:
@@ -105,8 +112,7 @@ class Widget_User extends Zen_Widget{
 
         $this->_data = $this->_db->fetchRow($sql);
         if(empty($this->_data)) {
-            Widget_Api_Response::sendHttpStatus(403);
-            Widget_Api_Response::sendResponse(PERMISSION_DENIED);
+            throw new Widget_User_Exception('用户不存在', 4013);
         }
 
         $this->_permission = unserialize($this->_data['jobs']);
@@ -126,6 +132,8 @@ class Widget_User extends Zen_Widget{
                 return new Widget_User($identity,self::S_UID);
             case is_string($identity):
                 return new Widget_User($identity, self::S_TOKEN);
+            case is_array($identity):
+                return new Widget_User($identity, self::S_PASSWD);
             default:
                 throw new Widget_User_Exception('无法构建用户', HTTP_SERVER_ERROR);
         }
@@ -188,28 +196,65 @@ class Widget_User extends Zen_Widget{
     /**
      * @param $key
      * @param $value
-     * @throws Widget_User_Exception|Zen_DB_Exception
+     * @throws Widget_User_Exception
      */
     public function __set($key, $value) {
         if(!in_array($key, self::WRITEABLE_FIELD)) {
             throw new Widget_User_Exception('尝试在不可写入的字段进行写入操作', PERMISSION_DENIED);
         }
-        
+
+        $this->_data[$key] = $value;
         if($key == 'jobs') {
             //刷新对象数据
-            $this->_data[$key] = $value;
             $this->_permission = $value;
             $value = serialize($value);
-        }else {
-            $this->_data[$key] = $value;
         }
-        
+
+        $this->_cache[$key] = $value;
+    }
+
+    /**
+     * 增加积分
+     *
+     * @param int $point
+     */
+    public function addPoint(int $point) {
+        if(!isset($this->_cache['point'])) {
+            $this->_cache['point'] = $this->_data['point'] ?? 0;
+        }
+
+        $this->_cache['point'] += $point;
+    }
+
+    /**
+     * 消费积分
+     *
+     * @param int $point
+     */
+    public function rewardPoint(int $point) {
+        if(!isset($this->_cache['point'])) {
+            $this->_cache['point'] = $this->_data['point'] ?? 0;
+        }else {
+            $this->_cache['point'] -= $point;
+        }
+    }
+
+    /**
+     * 保存缓存中的数据
+     */
+    public function save() {
         $sql = $this->_db
             ->update('users')
-            ->rows(array(
-               $key => $value 
-            ));
-        $this->_db->query($sql);
+            ->rows($this->_cache)
+            ->where('uid = ?', $this->_uid);
+        $ret = $this->_db->query($sql);
+
+        if($ret != 1) {
+            throw new Widget_User_Exception('保存数据时出错', HTTP_SERVER_ERROR);
+        }
+
+        // 清空缓存
+        $this->_cache = array();
     }
 
     /**

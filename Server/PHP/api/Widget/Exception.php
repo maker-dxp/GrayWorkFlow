@@ -1,5 +1,15 @@
 <?php
 
-class Widget_Exception extends Exception {
+//异常常量
+const   HTTP_NOT_FOUND      =       404;
+const   METHOD_NOT_ALLOW    =       405;
+const   HTTP_SERVER_ERROR   =       500;
 
+class Widget_Exception extends Exception {
+    public function __construct($message, $code = 0)
+    {
+        parent::__construct();
+        $this->message = $message . "\n";
+        $this->code = $code;
+    }
 }
