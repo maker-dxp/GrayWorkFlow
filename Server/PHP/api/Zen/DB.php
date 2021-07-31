@@ -474,8 +474,15 @@ class Zen_DB {
     }
 
     /**
+     * 数据库请求
+     *
      * @param Zen_DB_Query $query
-     * @return int|resource
+     * @return false|int|resource
+     * <p>
+     * 若操作为UPDATE或DELETE，返回影响的行数。
+     * 若操作为INSERT，返回最后插入的ID。
+     * 若为其他操作，返回资源
+     * </p>
      * @throws Zen_DB_Exception
      */
     public function query(Zen_DB_Query $query) {

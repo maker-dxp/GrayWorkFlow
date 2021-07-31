@@ -17,11 +17,4 @@ class Widget_Entry_User extends Widget_Api {
             self::sendResponse(NOT_LOGGED_IN);
         }
     }
-
-    /**
-     * @map     '/'
-     */
-    public static function test() {
-        echo 'successful.';
-    }
 }

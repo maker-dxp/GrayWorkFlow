@@ -133,12 +133,17 @@ class Widget_User extends Zen_Widget{
                     ->limit(1);
                 break;
             case self::S_TOKEN:     //token方式创建
-                $this->verifyToken($data);
+                if(!$this->verifyToken($data)) {
+                    throw new Widget_User_Exception('无法构建用户', TOKEN_IS_INCORRECT);
+                }
                 $this->_uid = $this->_token_data['uid'];
                 $sql->where('uid = ?', $this->_uid)
                     ->limit(1);
                 break;
-            case self::S_PASSWD:
+            case self::S_PASSWD:    //密码方式验证
+                if(!isset($data['user_name']) || !isset($data['user_passwd'])){
+                    throw new Widget_User_Exception('无法构建用户', HTTP_SERVER_ERROR);
+                }
                 $user_name = $data['user_name'];
                 $user_passwd = $data['user_passwd'];
                 $sql->where('user_name = ?', $user_name)
@@ -163,7 +168,24 @@ class Widget_User extends Zen_Widget{
         $this->_permission = $this->_data['authority'];
     }
 
-    private function getAuthStringArray(int $auth): array {
+    /**
+     * 最后进行一次保存
+     *
+     * @throws Widget_User_Exception
+     */
+    public function __destruct() {
+        if(!empty($this->_cache)) {
+            $this->save();
+        }
+    }
+
+    /**
+     * 获取权限数组
+     *
+     * @param int $auth
+     * @return array|string[]
+     */
+    public function getAuthStringArray(int $auth): array {
         if($auth & C_NULL) {
             return array(self::AUTH_TABLE[C_NULL]);
         }
@@ -187,12 +209,10 @@ class Widget_User extends Zen_Widget{
      * @param int|string|array 传入一个uid/token或用户名密码数组
      * @throws Widget_User_Exception|Zen_DB_Exception
      */
-    public static function verify(): Widget_User {
-        $identity = func_get_arg(0);
+    public static function verify($identity): Widget_User {
+//        $identity = func_get_arg(0);
 
         switch (true) {
-            case is_int($identity):
-                return new Widget_User($identity,self::S_UID);
             case is_string($identity):
                 return new Widget_User($identity, self::S_TOKEN);
             case is_array($identity):
@@ -203,11 +223,23 @@ class Widget_User extends Zen_Widget{
     }
 
     /**
+     * 创建一个用户对象
+     *
+     * @param int $uid
+     * @return Widget_User
+     * @throws Widget_User_Exception
+     * @throws Zen_DB_Exception
+     */
+    public static function factory(int $uid): Widget_User {
+        return new Widget_User($uid, self::S_UID);
+    }
+
+    /**
      * 创建一个新用户
      *
      * @param array $data
+     * @return int
      * @throws Widget_User_Exception
-     * @throws Zen_DB_Exception
      */
     public function create(array $data) {
         if(!$this->isAdmin()) {
@@ -218,22 +250,27 @@ class Widget_User extends Zen_Widget{
             throw new Widget_User_Exception('缺少用户名', EMPTY_BODY_FIELD);
         }
 
-        $sql = $this->_db
-            ->insert('users')
-            ->rows(array(
-               'user_name'              => $data['UserName'],
-               'user_password'          => isset($data['Password']) ?
-                       $this->hashPassword($data['Password']) :
-                       $this->hashPassword($this->getRandPassword()),
-               'nick_name'              => $data['NickName'] ?? $this->getRandName(),
-               'avatar'                 => $data['Icon'] ?? DEFAULT_AVATAR,
-               'authority'              => P_BAN,
-               'point'                  => 0,
-               'qq'                     => $data['QQ'],
-               'create_time'            => date('Y-m-d'),
-               'last_time'              => '1970-1-1'
-            ));
-        return $this->_db->query($sql);
+        try{
+            $sql = $this->_db
+                ->insert('users')
+                ->rows(array(
+                    'user_name'              => $data['UserName'],
+                    'user_password'          => isset($data['Password']) ?
+                        $this->hashPassword($data['Password']) :
+                        $this->hashPassword($this->getRandPassword()),
+                    'nick_name'              => $data['NickName'] ?? $this->getRandName(),
+                    'avatar'                 => $data['Icon'] ?? DEFAULT_AVATAR,
+                    'authority'              => P_BAN,
+                    'point'                  => 0,
+                    'qq'                     => $data['QQ'],
+                    'create_time'            => date('Y-m-d'),
+                    'last_time'              => '1970-1-1'
+                ));
+            return $this->_db->query($sql);
+        }catch(Zen_DB_Exception $e) {
+            throw new Widget_User_Exception('服务器错误', HTTP_SERVER_ERROR);
+        }
+
     }
 
     /**
@@ -241,7 +278,7 @@ class Widget_User extends Zen_Widget{
      */
     public function sendToken() {
         if(empty($this->_token)) {
-            throw new Widget_User_Exception('没有有效token可以设置', HTTP_SERVER_ERROR);
+            $this->_token = $this->createToken($this->_data['nick_name'], $this->_uid);
         }
 
         Zen_Response::getInstance()->setHeader('Access-Token', $this->_token);
@@ -326,18 +363,18 @@ class Widget_User extends Zen_Widget{
     /**
      * 创建一个token
      *
-     * @param $display_name
+     * @param $nick_name
      * @param $uid
      * @return string
      */
-    private function createToken($display_name, $uid): string {
+    private function createToken($nick_name, $uid): string {
         $time = time(); //当前时间
         $payload = [
             'iat' => $time, //签发时间
             'nbf' => $time , //(Not Before)：某个时间点后才能访问，比如设置time+30，表示当前时间30秒后才能使用
             'exp' => $time+7200, //过期时间,这里设置2个小时
             'data' => [ //自定义信息，不要定义敏感信息
-                'DisplayName' => $display_name,
+                'NickName' => $nick_name,
                 'uid' => $uid
             ]
         ];
@@ -396,7 +433,7 @@ class Widget_User extends Zen_Widget{
      *
      * @return bool
      */
-    private function isAdmin() {
+    public function isAdmin() {
         return ($this->_permission & C_ADMIN);
     }
 }
