@@ -5,8 +5,6 @@ const   OK                  =       200;
 const   LOGIN_SUCCESS       =       2000;
 const   REGISTER_SUCCESS    =       2001;
 
-const   OPERATION_FAIL      =       300;
-
 const   INVALID_REQUEST     =       400;
 const   EMPTY_BODY          =       4000;
 const   WRONG_JSON          =       4001;
@@ -19,6 +17,8 @@ const   TOKEN_IS_NOT_FOUND  =       4010;
 const   TOKEN_IS_EXPIRED    =       4011;
 const   TOKEN_IS_INCORRECT  =       4012;
 const   WRONG_USR_OR_PWD    =       4013;
+
+const   OPERATION_FAIL      =       402;
 
 const   PERMISSION_DENIED   =       403;
 
