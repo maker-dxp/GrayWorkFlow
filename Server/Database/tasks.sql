@@ -2,7 +2,7 @@
 DROP TABLE IF EXISTS`tasks`;
 CREATE TABLE `tasks`(
   `task_id` INT AUTO_INCREMENT,
-  `user_id` INT NOT NULL,
+  `user_id` INT DEFAULT 0,
   `proj_id` INT NOT NULL,
   `type`    INT NOT NULL,
   `status`  INT DEFAULT 0,

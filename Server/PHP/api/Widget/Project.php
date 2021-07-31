@@ -21,6 +21,11 @@ const PROJ_UPLOAD   =       3;
 const PROJ_DONE     =       4;
 const PROJ_DELETE   =       5;
 
+/* 任务优先级 */
+const L_NORMAL      =       0;
+const L_PRIORITY    =       10;
+const L_URGENT      =       100;
+
 class Widget_Project extends Zen_Widget {
 
 }
