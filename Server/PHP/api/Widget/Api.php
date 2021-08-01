@@ -32,12 +32,24 @@ abstract class Widget_Api extends Zen_Widget{
     /**
      * 检查登录
      *
-     * @return Widget_Users
-     * @throws Widget_Users_Exception
-     * @throws Zen_DB_Exception
+     * @return bool
      */
-    protected static function checkLogin() {
-        return Widget_Users::verify(Widget_Api_Request::getToken());
+    protected static function checkLoginFromToken(): bool {
+        return (bool)Widget_Users::getTokenData(Widget_Api_Request::getToken());
+    }
+
+    /**
+     * 从token中验证是否有管理员权限
+     *
+     * @return bool
+     */
+    protected static function checkAdminFromToken(): bool {
+        $permission = Widget_Users::getTokenData(Widget_Api_Request::getToken());
+        if($permission === false) {
+            return false;
+        }
+
+        return (bool)($permission & C_ADMIN);
     }
 
     /**

@@ -74,7 +74,7 @@ class Widget_Api_Response {
      * @param string $message
      */
     public static function sendResponse(int $code, ?array $data = null, string $message = '') {
-        $message = ($message) ?? self::MESSAGE[$code];
+        $message = empty($message) ? self::MESSAGE[$code] : $message;
 
         $ret = array(
             'code' => $code,

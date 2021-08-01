@@ -25,7 +25,7 @@ class Widget_Error_Handle {
      *
      * @param Exception $e
      */
-    public static function exceptionHandle(Exception $e) {
+    public static function exceptionHandle($e) {
         $messages  = PHP_EOL;
         $messages .= "[Date]\t\t"   . date('Y-m-d H:i:s')           . PHP_EOL;
         $messages .= "[File]\t\t"   . $e->getFile()                     . PHP_EOL;
@@ -34,9 +34,18 @@ class Widget_Error_Handle {
         $messages .= "[Trace]\n"    . $e->getTraceAsString()            . PHP_EOL . PHP_EOL;
         Widget_Log::writeToLog($messages, Widget_log::L_ERROR);
 
+        if(WIDGET_DEBUG) {
+            Widget_Api_Response::sendResponse($e->getCode(), null, $e->getMessage(). PHP_EOL . $e->getTraceAsString());
+        }
+
+        if($e instanceof Zen_Route_Exception) {
+            Widget_Api_Response::sendHttpStatus($e->getCode());
+            Widget_Api_Response::sendResponse($e->getCode());
+        }
+
         if($e instanceof Zen_Exception) {
             Widget_Api_Response::sendHttpStatus(500);
-            Widget_Api_Response::sendResponse(HTTP_SERVER_ERROR);
+            Widget_Api_Response::sendResponse(500);
         }
 
         if($e instanceof Widget_Exception) {
@@ -51,15 +60,21 @@ class Widget_Error_Handle {
      * @param int $level
      * @param string $message
      */
-    public static function errorHandle(int $level, string $message) {
+    public static function errorHandle(int $level, string $message, string $file, int $line) {
         $messages  = PHP_EOL;
         $messages .= "[Date]\t\t"   . date('Y-m-d H:i:s')           . PHP_EOL;
         $messages .= "[Level]\t\t"  . self::ERROR_TABLE[$level]         . PHP_EOL;
+        $messages .= "[File]\t\t"    . ($file ?? 'unknown')                                 . PHP_EOL;
+        $messages .= "[Line]\t\t"    . ($line ?? 'unknown')                                 . PHP_EOL;
         $messages .= "[Message]\t"  . $message                          . PHP_EOL . PHP_EOL;
         Widget_Log::writeToLog($messages);
 
         Widget_Api_Response::sendHttpStatus(500);
-        Widget_Api_Response::sendResponse(HTTP_SERVER_ERROR);
+        if(WIDGET_DEBUG) {
+            Widget_Api_Response::sendResponse($level, null, $messages);
+        }else {
+            Widget_Api_Response::sendResponse(500);
+        }
     }
 
     /**

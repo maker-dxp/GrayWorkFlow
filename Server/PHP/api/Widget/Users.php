@@ -121,65 +121,69 @@ class Widget_Users extends Widget_Api {
      *
      * @param mixed $data   任意类型的用于用户验证的数据
      * @param int $switch
-     * @throws Widget_Users_Exception|Zen_DB_Exception
+     * @throws Widget_Users_Exception
      */
     private function __construct($data, int $switch) {
-        $this->_db = Zen_DB::get();
-        $sql = $this->_db
-            ->select('nick_name', 'avatar', 'authority', 'point', 'qq', 'create_time', 'last_time')
-            ->from('users');
-        
-        switch($switch) {
-            case self::S_UID:       //uid方式创建
-                $this->_uid = $data;
-                $sql->where('uid = ?', $this->_uid)
-                    ->limit(1);
-                $isLogin = false;
-                break;
-            case self::S_TOKEN:     //token方式创建
-                if(!$this->verifyToken($data)) {
-                    throw new Widget_Users_Exception('无法构建用户', TOKEN_IS_INCORRECT);
-                }
-                $this->_uid = $this->_token_data['uid'];
-                $sql->where('uid = ?', $this->_uid)
-                    ->limit(1);
-                $isLogin = true;
-                break;
-            case self::S_PASSWD:    //密码方式验证
-                if(!isset($data['user_name']) || !isset($data['user_passwd'])){
-                    throw new Widget_Users_Exception('无法构建用户', HTTP_SERVER_ERROR);
-                }
-                $user_name = $data['user_name'];
-                $user_passwd = $data['user_passwd'];
-                $sql->where('user_name = ?', $user_name)
-                    ->where('user_password = ?', $this->hashPassword($user_passwd))
-                    ->limit(1);
-                $isLogin = true;
-                break;
-            default:
-                throw new Widget_Users_Exception('无法构建用户', HTTP_SERVER_ERROR);
-        }
-
-        /* 获取用户信息 */
-        $this->_data = $this->_db->fetchRow($sql);
-        if(empty($this->_data)) {
-            $this->error("Login", "User not found");
-            throw new Widget_Users_Exception('用户不存在', USER_NOT_FOUND);
-        }
-
-        /* 登录后更改登录时间 */
-        if($isLogin) {
+        try{
+            $this->_db = Zen_DB::get();
             $sql = $this->_db
-                ->update('users')
-                ->rows(array(
-                    'last_time' => date('Y-m-s H:i:s')
-                ));
-            $this->_db->query($sql);
-            $this->log("Login");
-        }
+                ->select('nick_name', 'avatar', 'authority', 'point', 'qq', 'create_time', 'last_time')
+                ->from('users');
 
-        $this->_permission = $this->_data['authority'];
-        unset($this->_data['authority']);
+            switch($switch) {
+                case self::S_UID:       //uid方式创建
+                    $this->_uid = $data;
+                    $sql->where('uid = ?', $this->_uid)
+                        ->limit(1);
+                    $isLogin = false;
+                    break;
+                case self::S_TOKEN:     //token方式创建
+                    if(!$this->verifyToken($data)) {
+                        throw new Widget_Users_Exception('无法构建用户', TOKEN_IS_INCORRECT);
+                    }
+                    $this->_uid = $this->_token_data['uid'];
+                    $sql->where('uid = ?', $this->_uid)
+                        ->limit(1);
+                    $isLogin = true;
+                    break;
+                case self::S_PASSWD:    //密码方式验证
+                    if(!isset($data['user_name']) || !isset($data['user_passwd'])){
+                        throw new Widget_Users_Exception('无法构建用户', SERVER_ERROR);
+                    }
+                    $user_name = $data['user_name'];
+                    $user_passwd = $data['user_passwd'];
+                    $sql->where('user_name = ?', $user_name)
+                        ->where('user_password = ?', $this->hashPassword($user_passwd))
+                        ->limit(1);
+                    $isLogin = true;
+                    break;
+                default:
+                    throw new Widget_Users_Exception('无法构建用户', SERVER_ERROR);
+            }
+
+            /* 获取用户信息 */
+            $this->_data = $this->_db->fetchRow($sql);
+            if(empty($this->_data)) {
+                $this->error("Login", "User not found");
+                throw new Widget_Users_Exception('用户不存在', USER_NOT_FOUND);
+            }
+
+            /* 登录后更改登录时间 */
+            if($isLogin) {
+                $sql = $this->_db
+                    ->update('users')
+                    ->rows(array(
+                        'last_time' => date('Y-m-s H:i:s')
+                    ));
+                $this->_db->query($sql);
+                $this->log("Login");
+            }
+
+            $this->_permission = $this->_data['authority'];
+            unset($this->_data['authority']);
+        }catch (Zen_DB_Exception $dbe) {
+            throw new Widget_Users_Exception('服务器错误', SERVER_ERROR);
+        }
     }
 
     /**
@@ -243,7 +247,7 @@ class Widget_Users extends Widget_Api {
      * 验证一个用户是否合法同时返回一个用户对象
      *
      * @param int|string|array 传入一个uid/token或用户名密码数组
-     * @throws Widget_Users_Exception|Zen_DB_Exception
+     * @throws Widget_Users_Exception
      */
     public static function verify($identity): Widget_Users {
         switch (true) {
@@ -262,7 +266,6 @@ class Widget_Users extends Widget_Api {
      * @param int $uid
      * @return Widget_Users
      * @throws Widget_Users_Exception
-     * @throws Zen_DB_Exception
      */
     public static function factory(int $uid): Widget_Users {
         return new Widget_Users($uid, self::S_UID);
@@ -303,7 +306,7 @@ class Widget_Users extends Widget_Api {
                 ));
             return $this->_db->query($sql);
         }catch(Zen_DB_Exception $e) {
-            throw new Widget_Users_Exception('服务器错误', HTTP_SERVER_ERROR);
+            throw new Widget_Users_Exception('服务器错误', 500);
         }
 
     }
@@ -313,7 +316,7 @@ class Widget_Users extends Widget_Api {
      */
     public function sendToken() {
         if(empty($this->_token)) {
-            $this->_token = $this->createToken($this->_data['nick_name'], $this->_uid);
+            $this->_token = $this->createToken($this->_data['nick_name'], $this->_uid, $this->_permission);
         }
 
         Zen_Response::getInstance()->setHeader('Access-Token', $this->_token);
@@ -424,7 +427,7 @@ class Widget_Users extends Widget_Api {
             $this->_db->query($sql);
         }catch (Zen_DB_Exception $e) {
             $this->error("Save User Data", "Database Error");
-            throw new Widget_Users_Exception('保存数据时出错', HTTP_SERVER_ERROR);
+            throw new Widget_Users_Exception('保存数据时出错', 500);
         }
 
         // 清空缓存
@@ -438,7 +441,7 @@ class Widget_Users extends Widget_Api {
      * @param $uid
      * @return string
      */
-    private function createToken($nick_name, $uid): string {
+    private function createToken($nick_name, $uid, $permission): string {
         $time = time(); //当前时间
         $payload = [
             'iat' => $time, //签发时间
@@ -446,7 +449,8 @@ class Widget_Users extends Widget_Api {
             'exp' => $time+7200, //过期时间,这里设置2个小时
             'data' => [ //自定义信息，不要定义敏感信息
                 'NickName' => $nick_name,
-                'uid' => $uid
+                'uid' => $uid,
+                'Permission' => $permission
             ]
         ];
 
@@ -493,9 +497,9 @@ class Widget_Users extends Widget_Api {
      * 对密码进行加密
      *
      * @param string $password
-     * @return bool
+     * @return string
      */
-    private function hashPassword(string $password): bool {
+    private function hashPassword(string $password): string {
         return hash_hmac('sha256', "Gray" . $password . "Wind", self::PWD_KEY);
     }
 
@@ -506,6 +510,31 @@ class Widget_Users extends Widget_Api {
      */
     public function isAdmin(): bool {
         return (bool)($this->_permission & C_ADMIN);
+    }
+
+    /**
+     * 获取token数据
+     *
+     * @param string $token
+     * @return false|array
+     */
+    public static function getTokenData(string $token) {
+        try {
+            JWT::$leeway = 60;  //允许的时间误差,单位:min
+            return JWT::decode($token, self::JWT_KEY, ['HS256'])['data'];
+        } catch(UnexpectedValueException $e) {  //捕获所有异常
+            return false;
+        }
+    }
+
+    /**
+     * 获取token中的权限信息
+     *
+     * @param string $token
+     * @return mixed
+     */
+    public static function getTokenPermission(string $token) {
+        return self::getTokenData($token)['Permission'];
     }
 
     /**

@@ -47,7 +47,7 @@ class Zen_Router {
         //匹配路由规则
         if($path_info === '/') {
             if(!isset(self::$_map['/'])){
-                throw new Zen_Route_Exception('Unable to resolve path。', HTTP_NOT_FOUND);
+                throw new Zen_Route_Exception('Unable to resolve path。', 404);
             }
             $match = '/';
         }else {
@@ -58,7 +58,7 @@ class Zen_Router {
                 }
             }
             if(empty($matches)) { //未匹配到或只匹配到了根目录
-                throw new Zen_Route_Exception('', HTTP_NOT_FOUND);
+                throw new Zen_Route_Exception('', 404);
             }
             $match = max($matches);
         }
@@ -70,7 +70,7 @@ class Zen_Router {
 
         //call function
         if(!self::checkMethod($match)) { //验证请求方法
-            throw new Zen_Route_Exception('', METHOD_NOT_ALLOW);
+            throw new Zen_Route_Exception('', 405);
         }
         $cnt = isset(self::$_map[$match]['args']) ? count(self::$_map[$match]['args']) : 0;
         $function_args = array();
@@ -200,7 +200,7 @@ class Zen_Router {
                 }
             }
         } catch (ReflectionException $ref) {
-            throw new Zen_Route_Exception($ref->getMessage(), HTTP_SERVER_ERROR);
+            throw new Zen_Route_Exception($ref->getMessage(), 500);
         }
     }
 

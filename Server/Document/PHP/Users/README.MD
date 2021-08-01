@@ -62,7 +62,7 @@
 
 - 如果调用函数的对象没有`C_ADMIN`权限，抛出`Widget_Users_Exception`异常，状态码为`PERMISSION_DENIED`。
 - 如果数组中缺少`UserName`，抛出`Widget_Users_Exception`异常，状态码为`EMPTY_BODY_FIELD`。
-- 如果发生数据库错误，抛出`Widget_Users_Exception`异常，状态码为`HTTP_SERVER_ERROR`。
+- 如果发生数据库错误，抛出`Widget_Users_Exception`异常，状态码为`500`。
 
 ### 发送Token至响应头
 
