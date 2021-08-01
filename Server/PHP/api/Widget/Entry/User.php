@@ -7,12 +7,12 @@ class Widget_Entry_User extends Widget_Api {
      */
     public static function login() {
         $data = self::getRequestBody();
-        try{
-            Widget_User::verify(array(
+        try {
+            Widget_Users::verify(array(
                 $data['UserName'],
                 $data['Password']
             ))->sendToken();
-        }catch (Widget_User_Exception $e) {
+        } catch (Widget_Users_Exception $e) {
             self::sendHttpStatus(401);
             self::sendResponse(NOT_LOGGED_IN);
         }
@@ -25,7 +25,7 @@ class Widget_Entry_User extends Widget_Api {
     public static function info() {
         $data = self::getRequestBody();
         try {
-            $user_data = Widget_User::verify(
+            $user_data = Widget_Users::verify(
                 $data['Access-Token']
             ); 
             self::sendResponse(200,array(
@@ -35,7 +35,7 @@ class Widget_Entry_User extends Widget_Api {
                 "Permission" => $user_data -> authority,
                 "lastLoginAt" => $user_data -> last_time
             ));
-        }catch(Widget_User_Exception $e){
+        }catch(Widget_Users_Exception $e){
             self::sendHttpStatus(401);
             self::sendResponse(NOT_LOGGED_IN);
         }
@@ -48,7 +48,7 @@ class Widget_Entry_User extends Widget_Api {
     public static function pwd() {
         $data = self::getRequestBody();
         try {
-            $user_data = Widget_User::verify(
+            $user_data = Widget_Users::verify(
                 $data['Access-Token']
             );
             if($data["OriginPWD"] == $user_data -> user_password){
@@ -59,7 +59,7 @@ class Widget_Entry_User extends Widget_Api {
                 self::sendResponse(200,null,"修改密码失败");
             };
             
-        }catch(Widget_User_Exception $e){
+        }catch(Widget_Users_Exception $e){
             self::sendHttpStatus(401);
             self::sendResponse(NOT_LOGGED_IN);
         }
@@ -72,13 +72,13 @@ class Widget_Entry_User extends Widget_Api {
     public static function name() {//是否存在命名冲突存在则改为Nickname
         $data = self::getRequestBody();
         try {
-            $user_data = Widget_User::verify(
+            $user_data = Widget_Users::verify(
                 $data['Access-Token']
             );
             $user_data -> user_password = $data["UserName"];
             $user_data -> save();
             self::sendResponse(200,null,"修改昵称成功");
-        }catch(Widget_User_Exception $e){
+        }catch(Widget_Users_Exception $e){
             self::sendHttpStatus(401);
             self::sendResponse(NOT_LOGGED_IN);
         }

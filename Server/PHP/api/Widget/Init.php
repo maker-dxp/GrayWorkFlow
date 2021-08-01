@@ -26,5 +26,12 @@ class Widget_Init extends Zen_Widget{
                 $ignore = $options->getOption('RouteIgnore');
                 Zen_Router::init($map, $ignore);
         }
+
+        /*
+         * 处理异常和错误
+         */
+        set_exception_handler(array('Widget_Error_Handle', 'exceptionHandle'));
+        set_error_handler(array('Widget_Error_Handle', 'errorHandle'), E_ALL);
+        register_shutdown_function(array('Widget_Error_Handle', 'fatalErrorHandle'));
     }
 }

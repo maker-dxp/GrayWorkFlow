@@ -52,7 +52,7 @@ const __ZEN_DATABASE__ = array(
         'user' => 'tenko',
         'password' => 'Ap009731',
         'charset' => 'utf8mb4',
-        'authority' => Zen_DB::AUTH_MAIN
+        'authority' => AUTH_MAIN
     ]
 );
 

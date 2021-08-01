@@ -32,12 +32,12 @@ abstract class Widget_Api extends Zen_Widget{
     /**
      * 检查登录
      *
-     * @return Widget_User
-     * @throws Widget_User_Exception
+     * @return Widget_Users
+     * @throws Widget_Users_Exception
      * @throws Zen_DB_Exception
      */
     protected static function checkLogin() {
-        return Widget_User::verify(Widget_Api_Request::getToken());
+        return Widget_Users::verify(Widget_Api_Request::getToken());
     }
 
     /**
@@ -50,5 +50,32 @@ abstract class Widget_Api extends Zen_Widget{
      */
     protected static function getRequestBody() {
         return Widget_Api_Request::parseRawJson();
+    }
+
+    /**
+     * 输出错误日志
+     *
+     * @param string $message
+     */
+    protected static function eLog(string $message) {
+        Widget_Log::writeToLog($message, Widget_Log::L_ERROR);
+    }
+
+    /**
+     * 输出警告日志
+     *
+     * @param string $message
+     */
+    protected static function wLog(string $message) {
+        Widget_Log::writeToLog($message, Widget_Log::L_WARNING);
+    }
+
+    /**
+     * 输出日志
+     *
+     * @param string $message
+     */
+    protected static function iLog(string $message) {
+        Widget_Log::writeToLog($message, Widget_Log::L_INFO);
     }
 }
