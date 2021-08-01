@@ -358,6 +358,43 @@ class Zen_DB_Query {
     }
 
     /**
+     * 转换为sql字符串
+     *
+     * @return string | null
+     */
+    public function __toString() : ?string {
+//        switch ($this->_query_builder['action']) {
+//            case Zen_DB::SELECT:
+//                return $this->_adapter->parseSelect($this->_query_builder);
+//            case Zen_DB::INSERT:
+//                return 'INSERT INTO '
+//                    . $this->_query_builder['table']
+//                    . '(' . implode(' , ', array_keys($this->_query_builder['rows'])) . ')'
+//                    . ' VALUES '
+//                    . '(' . implode(' , ', array_values($this->_query_builder['rows'])) . ')'
+//                    . $this->_query_builder['limit'];
+//            case Zen_DB::DELETE:
+//                return 'DELETE FROM '
+//                    . $this->_query_builder['table']
+//                    . $this->_query_builder['where'];
+//            case Zen_DB::UPDATE:
+//                $columns = array();
+//                if (isset($this->_query_builder['rows'])) {
+//                    foreach ($this->_query_builder['rows'] as $key => $val) {
+//                        $columns[] = "$key = $val";
+//                    }
+//                }
+//                return 'UPDATE '
+//                    . $this->_query_builder['table']
+//                    . ' SET ' . implode(' , ', $columns)
+//                    . $this->_query_builder['where'];
+//            default:
+//                return NULL;
+//        }
+        return '';
+    }
+
+    /**
      * 从参数中合成查询字段
      *
      * @access private

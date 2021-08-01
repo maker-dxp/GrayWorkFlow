@@ -4,7 +4,7 @@
 
 Method : POST
 
-URL :  /api/User/login
+URL :  /api/user/login
 
 Request:
 
@@ -17,8 +17,8 @@ Request:
 Params:
 
     {
-        "UserName": (String),
-        "Password": (String)
+        "UserName": "",
+        "Password": ""
     }
 ----------------------------------------
 Response:
@@ -43,7 +43,7 @@ Body:
 
 Method : GET
 
-URL : /api/User/info
+URL : /api/user/info
 
 Request:
 
@@ -73,11 +73,66 @@ Body:
         "code": 200,
         "message": "成功",
          "data": {
-            "UserName": (String),
-            "Icon": (String),
-            "Point": (Number),
-            "Permission": [(String)], // 传递用户有的职位
-            "lastLoginAt": (YYYY-MM-DD   HH:MM)
+            "UserName": "test",
+            "DisplayName": "test2",
+            "Icon": "default.png",
+            "Point": "0",
+            "Permission": null,
+            "LastLoginAt": "2021-07-23 23:11:16"
+        }
+    }
+```
+
+- - -
+
+## 创建用户
+
+Method : PUT
+
+URL : /api/user/info
+
+Request:
+
+>Header:
+>
+>| key | value |
+>| ---- | ---- |
+>| Access-Token: | [jwt-token] |
+
+Body:
+
+```
+{
+    "UserName": "GrayWind",     //必须
+    "Password": "GrayWind",     //必须
+    "DisplayName": "GrayWind",
+    "Icon": "/path/icon/xxx.png"
+}
+```
+
+- - -
+
+Response:
+
+> Header:
+>
+> | key | value |
+> | ---- | ---- |
+> |  none | none |
+
+Body:
+
+```
+    {
+        "code": 200,
+        "message": "成功",
+        "data": {
+            "UserName": "test",
+            "DisplayName": "test2",
+            "Icon": "default.png",
+            "Point": "0",
+            "Permission": null,
+            "LastLoginAt": "2021-07-23 23:11:16"
         }
     }
 ```
@@ -88,7 +143,7 @@ Body:
 
 Method : POST
 
-URL : /api/User/pwd
+URL : /api/user/pwd
 
 Request:
 
@@ -102,24 +157,19 @@ Body:
 
 ```
     {
-        "OriginPWD":(String)   //老密码 必须
-        "NewPWD":(String)     //新密码 必须
+        "uid": 0        //只有管理员可以设置其他人的密码
+        "OriginPWD":""    //老密码
+        "NewPWD":""       //新密码       如果不存在新密码则会随机设置一个密码
     }
 ```
 
 Response:
 
-Head:None
-
-Body:
 ```
-
     {
-        "code": 200,
-        "message": "修改密码成功",
-        "data":{}
+        "OriginPWD":""    //老密码
+        "NewPWD":""       //新密码       
     }
-
 ```
 
 - - -
@@ -128,7 +178,7 @@ Body:
 
 Method : POST
 
-URL : /api/User/name
+URL : /api/user/name
 
 Request:
 
@@ -142,24 +192,12 @@ Body:
 
 ```
     {
-        "UserName":(String)
+        "DisplayName": "名字"
     }
-```
-
-- - -
-
-Response:
-
-Head:none
-
-Body:
-
-```
-
+    
+    //如果是管理员，则可以修改其他人的名称
     {
-        "code": 200,
-        "message": "修改用户名成功！",
-        "data":{}
+        "uid": 1,       //要修改的用户
+        "DisplayName": "名字"
     }
-
 ```

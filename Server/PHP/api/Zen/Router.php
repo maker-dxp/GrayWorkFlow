@@ -96,8 +96,8 @@ class Zen_Router {
      * @param array $route_table
      */
     public static function init(array $route_table, array $route_ignore = array(), bool $refresh = false) {
-        self::setRouteIgnore($route_ignore, $refresh);
         self::setRouteTable($route_table);
+
     }
 
     /**
@@ -121,19 +121,17 @@ class Zen_Router {
             $path = $dir;
         }
 
-        $scan_files = scandir($path, SCANDIR_SORT_NONE);
-        $php_files = array_diff($scan_files, array('.', '..'));
+        $php_files = scandir($path);
 
         foreach ($php_files as $php_file) {
             $full_path = $path . DIRECTORY_SEPARATOR . $php_file;
-            if(is_dir($full_path)) {
-                //fix bug
-                $next_path = $path . DIRECTORY_SEPARATOR . $php_file;
-                self::setAllWidget($next_path, (empty($prefix) ? 'Widget_' . $php_file . '_' : $prefix . $php_file . '_'));
-                continue;
+            if(is_dir($full_path) && $php_file !== '.' && $php_file !== '..') {
+                $path = $path . DIRECTORY_SEPARATOR . $php_file;
+                self::setAllWidget($path, (empty($prefix) ? 'Widget_' . $php_file . '_' : $prefix . $php_file . '_'));
+                $path = __ZEN_WIDGET_PATH__;
             }
-            if(preg_match('/(.*)\.php$/i', $php_file, $matches)) {
-                self::$_widgets[] = ($prefix === '' ? 'Widget_' : $prefix) . $matches[1];
+            if(preg_match('/.*\.php$/i', $php_file)) {
+                self::$_widgets[] = ($prefix === '' ? 'Widget_' : $prefix) . substr($php_file, 0, strpos($php_file, '.php'));
             }
         }
 
@@ -172,7 +170,7 @@ class Zen_Router {
                         continue;
                     }
 
-                    if(preg_match(
+                    if($ret = preg_match(
                         '/@map\s*[\'\"](\/[A-Za-z0-9\/\-%]*)(:[A-Za-z0-9:\/]*)?[\'\"]/',
                         $doc,       // 获取到的注解
                         $matches)) {
@@ -197,8 +195,10 @@ class Zen_Router {
                             self::$_map[$path]['type'] = '';
                         }
                     }
+                    // var_dump($ret);
                 }
             }
+            var_dump(self::$_map);
         } catch (ReflectionException $ref) {
             throw new Zen_Route_Exception($ref->getMessage(), HTTP_SERVER_ERROR);
         }

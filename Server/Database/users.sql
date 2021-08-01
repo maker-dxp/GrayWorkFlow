@@ -1,17 +1,15 @@
 # 用户表
-DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users`(
-    `user_id`       INT AUTO_INCREMENT,
-    `user_name`     VARCHAR(64) DEFAULT "",
+    `uid` INT AUTO_INCREMENT,
+    `user_name` VARCHAR(64) DEFAULT "",
     `user_password` VARCHAR(128) DEFAULT "",
-    `nick_name`     VARCHAR(64) DEFAULT "",
-    `avatar`        VARCHAR(256) DEFAULT "",
-    `authority`     INT DEFAULT 0,
-    `qq`            VARCHAR(16) DEFAULT "",
-    `point`         INT DEFAULT 0,
-    `create_time`   TIMESTAMP,
-    `last_time`     TIMESTAMP,
-    PRIMARY KEY(`user_id`),
+    `display_name` VARCHAR(64) DEFAULT "",
+    `avatar` VARCHAR(256) DEFAULT "",
+    `jobs` VARCHAR(1024) DEFAULT "",
+    `point` INT DEFAULT 0,
+    `create_time` DATE,
+    `last_time` TIMESTAMP,
+    PRIMARY KEY(`uid`),
     UNIQUE KEY(`user_name`)
 )DEFAULT CHARSET="utf8mb4";
 
@@ -22,14 +20,13 @@ INSERT INTO `users`
           "",
           "用户已注销",
           "",
-          0,
-          "",
+          "a:0:{}",
           0,
           "2000-01-01",
           "2000-01-01"
     );
 
-UPDATE `users` SET `user_id` = 0 WHERE `user_id` = 1;
+UPDATE `users` SET `uid` = 0 WHERE `uid` = 1;
 #AUTO_INCREMENT会把uid变成1,故重新更新为0
 
 INSERT INTO `users`
@@ -39,8 +36,7 @@ VALUE(
      "b4dce90b1ceadd4616c6581c7d0fbf5579ce7a8e9620062ca78817493bf2219f",
      "超级管理员",
      "",
-     1,
-     "",
+     "a:2:{i:0;s:2:\"su\";i:1;s:5:\"admin\";}",
      0,
      "2021-07-23",
      "2021-07-23"

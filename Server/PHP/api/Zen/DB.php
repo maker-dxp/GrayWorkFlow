@@ -474,15 +474,8 @@ class Zen_DB {
     }
 
     /**
-     * 数据库请求
-     *
      * @param Zen_DB_Query $query
-     * @return false|int|resource
-     * <p>
-     * 若操作为UPDATE或DELETE，返回影响的行数。
-     * 若操作为INSERT，返回最后插入的ID。
-     * 若为其他操作，返回资源
-     * </p>
+     * @return int|resource
      * @throws Zen_DB_Exception
      */
     public function query(Zen_DB_Query $query) {
@@ -533,38 +526,6 @@ class Zen_DB {
             default:
                 return $res;
         }
-    }
-
-    /**
-     * 开启事务
-     *
-     * @return bool
-     * @throws Zen_DB_Exception
-     */
-    public function begin():bool {
-        if(!$this->_adapter->test()) {
-            $this->connect();
-        }
-
-        return $this->_adapter->begin();
-    }
-
-    /**
-     * 提交事务
-     *
-     * @return bool
-     */
-    public function commit(): bool {
-        return $this->_adapter->commit();
-    }
-
-    /**
-     * 回滚事务
-     *
-     * @return bool
-     */
-    public function rollback(): bool {
-        return $this->_adapter->rollback();
     }
 
     /**
