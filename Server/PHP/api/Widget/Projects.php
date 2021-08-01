@@ -26,6 +26,6 @@ const L_NORMAL      =       0;
 const L_PRIORITY    =       10;
 const L_URGENT      =       100;
 
-class Widget_Project extends Zen_Widget {
+class Widget_Projects extends Zen_Widget {
 
 }

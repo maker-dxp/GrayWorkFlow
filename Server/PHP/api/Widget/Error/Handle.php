@@ -26,7 +26,8 @@ class Widget_Error_Handle {
      * @param Exception $e
      */
     public static function exceptionHandle(Exception $e) {
-        $messages  = "[Date]\t\t"   . date('Y-m-d H:i:s')           . PHP_EOL;
+        $messages  = PHP_EOL;
+        $messages .= "[Date]\t\t"   . date('Y-m-d H:i:s')           . PHP_EOL;
         $messages .= "[File]\t\t"   . $e->getFile()                     . PHP_EOL;
         $messages .= "[Line]\t\t"   . $e->getLine()                     . PHP_EOL;
         $messages .= "[Message]\t"  . $e->getMessage()                  . PHP_EOL;
@@ -51,8 +52,9 @@ class Widget_Error_Handle {
      * @param string $message
      */
     public static function errorHandle(int $level, string $message) {
-        $messages  = "[Date]\t\t"   . date('Y-m-d H:i:s')           . PHP_EOL;
-        $messages .= "[Level]\t\t"  . $level                            . PHP_EOL;
+        $messages  = PHP_EOL;
+        $messages .= "[Date]\t\t"   . date('Y-m-d H:i:s')           . PHP_EOL;
+        $messages .= "[Level]\t\t"  . self::ERROR_TABLE[$level]         . PHP_EOL;
         $messages .= "[Message]\t"  . $message                          . PHP_EOL . PHP_EOL;
         Widget_Log::writeToLog($messages);
 
@@ -65,7 +67,8 @@ class Widget_Error_Handle {
      */
     public static function fatalErrorHandle() {
         $data = error_get_last();
-        $messages  = "[Date]\t\t"    . date('Y-m-d H:i:s')                                      . PHP_EOL;
+        $messages  = PHP_EOL;
+        $messages .= "[Date]\t\t"    . date('Y-m-d H:i:s')                                      . PHP_EOL;
         $messages .= "[Type]\t\t"    . (self::ERROR_TABLE[$data['type']] ?? 'unknown')              . PHP_EOL;
         $messages .= "[File]\t\t"    . ($data['file'] ?? 'unknown')                                 . PHP_EOL;
         $messages .= "[Line]\t\t"    . ($data['line'] ?? 'unknown')                                 . PHP_EOL;

@@ -50,6 +50,36 @@ abstract class Zen_DB_Adapter_Nosql implements Zen_DB_Adapter {
     abstract public function query($query, $handle, string $action = '', string $table = '');
 
     /**
+     * 开启事务
+     *
+     * @return bool
+     * <p>
+     * 如果开启事务失败，返回false。成功返回true。
+     * </p>
+     */
+    public function begin(): bool {
+        return false;
+    }
+
+    /**
+     * 提交事务
+     *
+     * @return bool
+     */
+    public function commit(): bool {
+        return false;
+    }
+
+    /**
+     * 回滚事务
+     *
+     * @return bool
+     */
+    public function rollback(): bool {
+        return false;
+    }
+
+    /**
      * 取出获取的数据的一行
      *
      * @param resource $resource 查询的数据资源
@@ -74,6 +104,7 @@ abstract class Zen_DB_Adapter_Nosql implements Zen_DB_Adapter {
     public function quoteValue(string $string): string
     {
         // TODO: Implement quoteValue() method.
+        return '';
     }
 
     /**
@@ -86,6 +117,7 @@ abstract class Zen_DB_Adapter_Nosql implements Zen_DB_Adapter {
     public function quoteColumn(string $string): string
     {
         // TODO: Implement quoteColumn() method.
+        return '';
     }
 
     /**

@@ -19,7 +19,7 @@ class Widget_Log {
 
         switch($type) {
             case self::L_ERROR:
-                @file_put_contents(ERROR_LOG_FILE, "[ERROR] " . $message, FILE_APPEND);
+                @file_put_contents(ERROR_LOG_FILE, "[ERROR]" . $message, FILE_APPEND);
                 break;
             case self::L_WARNING:
                 @file_put_contents(WARNING_LOG_FILE, "[WARNING] " . $message, FILE_APPEND);

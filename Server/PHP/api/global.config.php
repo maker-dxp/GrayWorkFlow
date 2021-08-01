@@ -49,10 +49,10 @@ const __ZEN_DATABASE__ = array(
         'database' => 'test',
         'host' => 'localhost',
         'port' => '3306',
-        'user' => 'tenko',
-        'password' => 'Ap009731',
+        'user' => '',
+        'password' => '',
         'charset' => 'utf8mb4',
-        'authority' => AUTH_MAIN
+        'authority' => Zen_DB::AUTH_MAIN
     ]
 );
 
