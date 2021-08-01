@@ -7,12 +7,12 @@ class Widget_Entry_User extends Widget_Api {
      */
     public static function login() {
         $data = self::getRequestBody();
-        try{
+        try {
             Widget_Users::verify(array(
-                $data['UserName'],
-                $data['Password']
+                'user_name'     =>  $data['UserName'],
+                'user_passwd'   =>  $data['Password']
             ))->sendToken();
-        }catch (Widget_Users_Exception $e) {
+        } catch (Widget_Users_Exception $e) {
             self::sendHttpStatus(401);
             self::sendResponse(NOT_LOGGED_IN);
         }
