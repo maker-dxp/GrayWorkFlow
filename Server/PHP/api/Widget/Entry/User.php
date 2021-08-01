@@ -53,6 +53,7 @@ class Widget_Entry_User extends Widget_Api {
             );
             if($data["OriginPWD"] == $user_data -> user_password){
                 $user_data -> user_password = $data["NewPWD"];
+                $user_data -> save();
                 self::sendResponse(200,null,"修改密码成功");
             }else{
                 self::sendResponse(200,null,"修改密码失败");
@@ -75,6 +76,7 @@ class Widget_Entry_User extends Widget_Api {
                 $data['Access-Token']
             );
             $user_data -> user_password = $data["UserName"];
+            $user_data -> save();
             self::sendResponse(200,null,"修改昵称成功");
         }catch(Widget_User_Exception $e){
             self::sendHttpStatus(401);
