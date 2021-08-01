@@ -83,8 +83,17 @@ export const constantRoutes = [
       }
     ]
   },
+]
+
+/**
+ * asyncRoutes
+ * the routes that need to be dynamically loaded based on user roles
+ */
+export const asyncRoutes = [
+  // 404 page must be placed at the end !!!
+  { path: '*', redirect: '/404', hidden: true },
   {
-    name: 'project',
+    name: 'Project',
     path: '/project',
     component: Layout,
     redirect: '/project/list',
@@ -108,7 +117,7 @@ export const constantRoutes = [
       {
         name: 'project_list',
         path: 'list',
-        component: () => import('@/views/Admin/Users/index'),
+        component: () => import('@/views/Project/list/index'),
         meta: {
           title: '项目列表',
           icon: 'tree-table',
@@ -137,9 +146,10 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/User',
+    name: 'User',
+    path: '/user',
     component: Layout,
-    redirect: '/User/Profile',
+    redirect: '/user/Profile',
     hidden: true,
     meta:{ title:'用户', icon: 'user'},
     children: [
@@ -188,15 +198,6 @@ export const constantRoutes = [
       }
     ]
   }
-]
-
-/**
- * asyncRoutes
- * the routes that need to be dynamically loaded based on user roles
- */
-export const asyncRoutes = [
-  // 404 page must be placed at the end !!!
-  { path: '*', redirect: '/404', hidden: true }
 ]
 
 const createRouter = () => new Router({
